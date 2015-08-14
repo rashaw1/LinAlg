@@ -39,6 +39,7 @@ public:
   void assign(int length, const T& a); // Resizes and sets elements to a
   // Overloaded operators
   T& operator[](int i); // Access value at index i
+  T operator[](int i) const; // Return by value
   Vector& operator=(const Vector& u); // Set this = u
   // Unary operators
   Vector operator+() const; 
@@ -47,7 +48,7 @@ public:
   Vector operator+(const Vector& u) const;
   Vector operator-(const Vector& u) const;
   Vector operator*(const T& scalar) const; // Scalar multiplication
-  Vector operator*(const Matrix<T>& mat) const; // Vector x matrix
+  Vector& operator*=(const Matrix<T>& mat) { return *this; } // Vector x matrix
   // Make T available externally
   typedef T value_type;  
 };
@@ -179,6 +180,12 @@ T& Vector<T>::operator[](int i) // Return v[i]
   return v[i];
 }
 
+template <class T>
+T Vector<T>::operator[](int i) const // Return by value
+{
+  // No bounds checking
+  return v[i];
+}
 
 template <class T>
 Vector<T>& Vector<T>::operator=(const Vector<T>& u)
@@ -257,11 +264,12 @@ Vector<T> Vector<T>::operator*(const T& scalar) const
   return rvec;
 }
 
-// Vector x matrix - will throw an error if wrong shapes
+// Vector x matrix and matrix x vector- will throw an error if wrong shapes
 template <class T>
-Vector<T> Vector<T>::operator*(const Matrix<T>& mat) const
+inline Vector<T> operator*(const Vector<T>& v, const Matrix<T>& mat)
 {
   // Assume left multiplication implies transpose                                      
+  int n = v.size();
   int cols = mat.ncols();
   int rows = mat.nrows();
   Vector<T> rVec(cols); // Return vector should have dimension cols                  
@@ -277,6 +285,27 @@ Vector<T> Vector<T>::operator*(const Matrix<T>& mat) const
   }
   return rVec;
 }
+
+template <class T>
+inline Vector<T> operator*(const Matrix<T>& mat, const Vector<T> v)
+{
+  int n = v.size();
+  int cols = mat.ncols();
+  int rows = mat.nrows();
+  Vector<T> rVec(rows); // Return vector should have dimension rows                                      
+  // For this to work we require n = cols                                                
+  if (n != cols) {
+    throw(Error("MATVECMULT", "Vector and matrix are wrong sizes to multiply."));
+  } else { // Do the multiplication                                                                            
+    for (int i = 0; i < rows; i++){
+      for (int j = 0; j < n; j++){
+        rVec[i] += mat(i, j)*v[j];
+      }
+    }
+  }
+  return rVec;
+}
+
 
 
 // Define some standard vector types
