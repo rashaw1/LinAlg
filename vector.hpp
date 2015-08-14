@@ -1,14 +1,19 @@
-// PURPOSE: defines and implements class Vector, a vector with members 
-//          of any class T, which has defined upon it the usual 
-//          arithemetic operations. 
-//
-// DATE             AUTHOR                CHANGES
-// ==========================================================================
-// 13/08/15         Robert Shaw           Original code
-//
+/*
+ *     PURPOSE: defines and implements class Vector, a vector with members 
+ *              of any class T that has defined upon it the usual 
+ *              arithemetic operations. 
+ * 
+ *     DATE             AUTHOR                CHANGES
+ *     =====================================================================
+ *     13/08/15         Robert Shaw           Original code
+ *     14/08/15         Robert Shaw           Added error throwing.
+ */
 
 #ifndef VECTORHEADERDEF
 #define VECTORHEADERDEF
+
+#include "error.hpp" 
+#include "matrix.hpp"
 
 template <class T>
 class Vector
@@ -42,7 +47,8 @@ public:
   Vector operator+(const Vector& u) const;
   Vector operator-(const Vector& u) const;
   Vector operator*(const T& scalar) const; // Scalar multiplication
-  // Typedefs
+  Vector operator*(const Matrix<T>& mat) const; // Vector x matrix
+  // Make T available externally
   typedef T value_type;  
 };
 
@@ -207,12 +213,16 @@ Vector<T> Vector<T>::operator-() const
   return rvec;
 }
 
-// Binary operators - will work for vectors of diff. sizes
+// Binary operators - will work for vectors of diff. sizes, but throw a warning
 template <class T>
 Vector<T> Vector<T>::operator+(const Vector<T>& u) const
 {
   int size = u.size();
   size = ( n < size ? n : size ); // Set size to the smaller of the vector sizes
+  // If different, warn the user, but carry on
+  if(size != n) { 
+    throw( Error("WARNING", "Vectors are different sizes.") );
+  }
   Vector<T> rvec(size); // If one vector is bigger, excess is lost
   for (int i = 0; i < size; i++) { // Do the addition
     rvec[i] = v[i]+u.v[i];
@@ -225,6 +235,10 @@ Vector<T> Vector<T>::operator-(const Vector<T>& u) const
 {
   int size = u.size();
   size = ( n < size ? n : size ); 
+  // If different, warn the user, but carry on                           
+  if(size != n) { 
+    throw(Error("WARNING", "Vectors are different sizes."));
+  } 
   Vector<T> rvec(size); 
   for (int i = 0; i < size; i++) { // Subtract 
     rvec[i] = v[i]-u.v[i]; // This is a left-to-right operator
@@ -242,5 +256,31 @@ Vector<T> Vector<T>::operator*(const T& scalar) const
   }
   return rvec;
 }
+
+// Vector x matrix - will throw an error if wrong shapes
+template <class T>
+Vector<T> Vector<T>::operator*(const Matrix<T>& mat) const
+{
+  // Assume left multiplication implies transpose                                      
+  int cols = mat.ncols();
+  int rows = mat.nrows();
+  Vector<T> rVec(cols); // Return vector should have dimension cols                  
+  // For this to work we require n = rows                                      
+  if (n != rows) {
+    throw(Error("VECMATMULT", "Vector and matrix are wrong sizes to multiply."));
+  } else { // Do the multiplication                                         
+    for (int i = 0; i < cols; i++){
+      for (int j = 0; j < n; j++){
+        rVec[i] += v[j]*mat(j, i);
+      }
+    }
+  }
+  return rVec;
+}
+
+
+// Define some standard vector types
+typedef Vector<int> iVector; // Vector of integers
+typedef Vector<double> dVector; // Vector of double precision floats
 
 #endif
