@@ -1,63 +1,21 @@
 /*
- *     PURPOSE: defines and implements class Matrix, a matrix with members
- *              of any class T that has defined upon it the usual
- *              arithemetic operations.
+ *   Implementation of matrix.hpp
  *
- *     DATE             AUTHOR                CHANGES
- *     =====================================================================
- *     13/08/15         Robert Shaw           Original code
- *     14/08/15         Robert Shaw           Added error throwing
+ *   DATE               AUTHOR                  CHANGES
+ *   ============================================================================
+ *   14/08/15           Robert Shaw             Original code.
+ *   15/08/15           Robert Shaw             Added error handling.
+ *
  */
+ 
+ #include "matrix.hpp"
+ #include "error.hpp"
+ 
+typedef double T; // Possibly template later
 
-#ifndef MATRIXHEADERDEF
-#define MATRIXHEADERDEF
+ // Clean up utility for memory deallocation
 
-#include "vector.hpp"
-#include "error.hpp"
-
-template <class T>
-class Matrix
-{
-private:
-  int rows, cols; // No. of rows and columns of the matrix
-  T** arr; // 2D array of matrix entries
-  void cleanUp(); // Utility function for memory deallocation
-public:
-  // Constructors and destructor
-  Matrix() : rows(0), cols(0), arr(NULL) {} // Default, forms zero length vector
-  Matrix(int m, int n); // Declare an m x n matrix
-  Matrix(int m, int n, const T& a); // Declare m x n matrix, all entries = a
-  Matrix(int m, int n, const T* a); // Matrix of m row copies of n-vector a
-  Matrix(const Matrix& other); // Copy constructor
-  ~Matrix(); // Destructor
-  // Accessors
-  int nrows() const { return rows; } // Returns no. of rows
-  int ncols() const { return cols; } // Returns no. of cols  
-  // Shaping functions
-  void resize(int m, int n); // Resize to empty m x n matrix
-  void assign(int m, int n, const T& a); // Resize, setting all entries to a
-  // Overloaded operators
-  T& operator[](int i); // Return pointer to first element of row i
-  T& operator()(int i, int j); // Return pointer to element ij
-  T operator()(int i, int j) const; // Return by value element ij
-  Matrix& operator=(const Matrix& other); 
-  // Unary operators
-  Matrix operator+() const; 
-  Matrix operator-() const;
-  // Binary operators
-  Matrix operator+(const Matrix& other) const;
-  Matrix operator-(const Matrix& other) const;
-  Matrix operator*(const T& scalar) const; // Scalar multiplication
-  Matrix operator*(const Matrix& other) const; // Matrix x matrix
-  // Intrinsic functions
-  Matrix transpose() const; // Return the transpose of the matrix
-  // Make T available externally
-  typedef T value_type;
-};
-
-// Clean up utility for memory deallocation
-template <class T>
-void Matrix<T>::cleanUp()
+void Matrix::cleanUp()
 {
   // No memory to deallocate if the matrix is null
   if(rows > 0){
@@ -73,8 +31,8 @@ void Matrix<T>::cleanUp()
 }
 
 // Constructors and destructor
-template <class T>
-Matrix<T>::Matrix(int m, int n)
+
+Matrix::Matrix(int m, int n)
 {
   // Set no. of rows and columns
   rows = m;
@@ -98,8 +56,8 @@ Matrix<T>::Matrix(int m, int n)
 
 
 // Same again, but initialise all elements to a
-template <class T>
-Matrix<T>::Matrix(int m, int n, const T& a)
+
+Matrix::Matrix(int m, int n, const T& a)
 {
   // Set no. of rows and columns                            
   rows = m;
@@ -126,8 +84,8 @@ Matrix<T>::Matrix(int m, int n, const T& a)
 }
 
 // Same again, but now initialise all rows to a given vector, a
-template <class T>
-Matrix<T>::Matrix(int m, int n, const T* a)
+
+Matrix::Matrix(int m, int n, const T* a)
 {
   // Set no. of rows and columns                      
   rows = m;
@@ -154,8 +112,8 @@ Matrix<T>::Matrix(int m, int n, const T* a)
 }
 
 // Copy constructor
-template <class T>
-Matrix<T>::Matrix(const Matrix<T>& other)
+
+Matrix::Matrix(const Matrix& other)
 {
   // Set size
   rows = other.nrows();
@@ -181,8 +139,8 @@ Matrix<T>::Matrix(const Matrix<T>& other)
 }
 
 // Destructor
-template <class T>
-Matrix<T>::~Matrix()
+
+Matrix::~Matrix()
 {
   // Deallocate memory if necessary
   cleanUp();
@@ -191,8 +149,8 @@ Matrix<T>::~Matrix()
 // Shaping functions
 
 // Resize to an empty m x n matrix
-template <class T>
-void Matrix<T>::resize(int m, int n)
+
+void Matrix::resize(int m, int n)
 {
   // Deallocate old memory if necessary
   cleanUp();
@@ -217,8 +175,8 @@ void Matrix<T>::resize(int m, int n)
 }
 
 // Do the above, but setting every element to a
-template <class T>
-void Matrix<T>::assign(int m, int n, const T& a)
+
+void Matrix::assign(int m, int n, const T& a)
 {
   //Do the resizing
   resize(m, n);
@@ -235,32 +193,32 @@ void Matrix<T>::assign(int m, int n, const T& a)
 // Overloaded operators
 
 // Return pointer to first element of row i
-template <class T>
-T& Matrix<T>::operator[](int i)
+
+T& Matrix::operator[](int i)
 {
   // No bounds checking
-  return arr[i];
+  return arr[i][0];
 }
 
 // Return pointer to element ij
-template <class T>
-T& Matrix<T>::operator()(int i, int j)
+
+T& Matrix::operator()(int i, int j)
 {
   // No bounds checking
   return arr[i][j];
 }
 
 // Return by value
-template <class T>
-T Matrix<T>::operator()(int i, int j) const
+
+T Matrix::operator()(int i, int j) const
 {
   // No bounds checking
   return arr[i][j];
 }
 
 // Overload assignment operator
-template <class T>
-Matrix<T>& Matrix<T>::operator=(const Matrix<T>& other)
+
+Matrix& Matrix::operator=(const Matrix& other)
 {
   // Get the size of other
   int newNRows = other.nrows();
@@ -277,10 +235,10 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& other)
 }
 
 // Unary operators
-template <class T>
-Matrix<T> Matrix<T>::operator+() const
+
+Matrix Matrix::operator+() const
 {
-  Matrix<T> rMat(rows, cols); // Create correct sized return matrix
+  Matrix rMat(rows, cols); // Create correct sized return matrix
   // Copy in values
   for (int i = 0; i < rows; i++){
     for (int j = 0; j < cols; j++){
@@ -290,10 +248,10 @@ Matrix<T> Matrix<T>::operator+() const
   return rMat;
 }
 
-template <class T>
-Matrix<T> Matrix<T>::operator-() const
+
+Matrix Matrix::operator-() const
 {
-  Matrix<T> rMat(rows, cols);
+  Matrix rMat(rows, cols);
   for (int i = 0; i < rows; i++){
     for (int j = 0; j < cols; j++){
       rMat(i, j) = -arr[i][j];
@@ -303,8 +261,8 @@ Matrix<T> Matrix<T>::operator-() const
 }
 
 // Binary operators - will work for different shaped matrices, but will throw a warning
-template <class T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const
+
+Matrix Matrix::operator+(const Matrix& other) const
 {
   // Get shape of other
   int oRows = other.nrows();
@@ -317,7 +275,7 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const
     throw(Error("WARNING", "Matrices are different sizes.")); 
   }
   // Make return matrix and add together elementwise
-  Matrix<T> rMat(rowsize, colsize);
+  Matrix rMat(rowsize, colsize);
   for (int i = 0; i < rowsize; i++){
     for (int j = 0; j < colsize; j++){
       rMat(i, j) = arr[i][j] + other.arr[i][j];
@@ -326,8 +284,8 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T>& other) const
   return rMat;
 }
 
-template <class T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const
+
+Matrix Matrix::operator-(const Matrix& other) const
 {
   // Get shape of other                                                  
   int oRows = other.nrows();
@@ -340,7 +298,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const
     throw(Error("WARNING", "Matrices are different sizes."));
   }
   // Make return matrix and add together elementwise                                      
-  Matrix<T> rMat(rowsize, colsize);
+  Matrix rMat(rowsize, colsize);
   for (int i = 0; i < rowsize; i++){
     for (int j = 0; j < colsize; j++){
       rMat(i, j) = arr[i][j] - other.arr[i][j]; // Left to right operator
@@ -350,29 +308,42 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& other) const
 }
 
 // Scalar multiplication
-template <class T>
-Matrix<T> Matrix<T>::operator*(const T& scalar) const
+
+inline Matrix operator*(const T& scalar, const Matrix& m) 
 {
   // Make return matrix of correct size
-  Matrix<T> rMat(rows, cols);
+  Matrix rMat(m.nrows(), m.ncols());
   // Multiply elements by scalar
-  for (int i = 0; i < rows; i++){
-    for (int j = 0; j < cols; j++){
-      rMat(i, j) *= arr[i][j]*scalar;
+  for (int i = 0; i < m.nrows(); i++){
+    for (int j = 0; j < m.ncols(); j++){
+      rMat(i, j) *= m(i, j)*scalar;
+    }
+  }
+  return rMat;
+}
+
+inline Matrix operator*(const Matrix& m, const T& scalar) 
+{
+  // Make return matrix of correct size
+  Matrix rMat(m.nrows(), m.ncols());
+  // Multiply elements by scalar
+  for (int i = 0; i < m.nrows(); i++){
+    for (int j = 0; j < m.ncols(); j++){
+      rMat(i, j) *= m(i, j)*scalar;
     }
   }
   return rMat;
 }
 
 // Matrix multiplication - will throw error if incompatible sizes, returning an empty matrix
-template <class T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) const
+
+Matrix Matrix::operator*(const Matrix& other) const
 {
   int oRows = other.nrows();
   int oCols = other.ncols();
   // Make return matrix of correct size
   // Left to right operator implies has shape (rows x oCols)
-  Matrix<T> rMat(rows, oCols);
+  Matrix rMat(rows, oCols);
   // Throw error if incompatible, leaving rMat empty
   if (cols != oRows){
     throw(Error("MATMULT", "Matrices are incompatible sizes for multiplication."));
@@ -392,10 +363,10 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) const
 // Intrinsic functions
 
 // Return the transpose of the matrix
-template <class T>
-Matrix<T> Matrix<T>::transpose() const
+
+Matrix Matrix::transpose() const
 {
-  Matrix<T> rMat(cols, rows); // Make return vector with rows and cols interchanged
+  Matrix rMat(cols, rows); // Make return vector with rows and cols interchanged
   // Set elements
   for(int i = 0; i < rows; i++){
     for(int j = 0; j < cols; j++){
@@ -404,9 +375,3 @@ Matrix<T> Matrix<T>::transpose() const
   }
   return rMat;
 }
-
-// Define some standard matrix types
-typedef Matrix<int> iMatrix; // Matrix of integers
-typedef Matrix<double> dMatrix; // Matrix of double precision floats
-
-#endif
