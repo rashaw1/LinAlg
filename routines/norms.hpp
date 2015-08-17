@@ -17,10 +17,9 @@
 #include <iostream>
 
 // Inner (dot) product of two vectors
-template <class T>
-T dot(const Vector<T>& u, const Vector<T>& v)
+double dot(const Vector& u, const Vector& v)
 {
-  T rVal; // Return value
+  double rVal = 0.0; // Return value
   // Get lengths of vectors, check they match
   int usize = u.size();
   int vsize = v.size();
@@ -38,7 +37,7 @@ T dot(const Vector<T>& u, const Vector<T>& v)
 // Overloaded p-norm calculator for different vector types
 // Default to 2-norm, p should be greater than 0, but no check is given
 // the routine will just return 0.0 if p <= 0.
-double norm(const dVector& u, int p = 2) 
+double norm(const Vector& u, int p = 2) 
 {
   int usize = u.size();
   double rVal = 0.0; // Initialise return value

@@ -8,12 +8,11 @@
 
 // Gram-Schmidt orthonormalises the array of vectors x, into the array of 
 // vectors q, returning true if successful. 
-bool dgegs(dVector* x, dVector* q, dMatrix& r)
+bool dgegs(Vector* x, Vector* q, Matrix& r)
 {
   const double PRECISION = 1E-12; // Set cut-off precision
   bool rVal = true; // Will only be changed to false if a problem occurs
   int dim = x[0].size(); // Get length of each vector
-  //dMatrix r(dim, dim); // Define a square metrix to stroe the transform vectors
   try{
     // Start procedure
     r(0, 0) = norm(x[0]); // Calculate 2-norm of x_0
@@ -22,11 +21,11 @@ bool dgegs(dVector* x, dVector* q, dMatrix& r)
     } else {
       q[0] = (1.0/r(0,0))*x[0]; // Normalise x_0
       // Begin main loop
-      dVector y(dim); // Store the un-normalised temp vector
+      Vector y(dim); // Store the un-normalised temp vector
       for(int j = 1; j < dim; j++){
 	y = x[j];
 	for(int i = 0; i < j; i++){
-	  r(i, j) = dot<double>(q[i], y); // qT*y
+	  r(i, j) = dot(q[i], y); // qT*y
 	  y = y - r(i, j)*q[i];
 	}
 	r(j, j) = norm(y); // 2-norm of y
@@ -47,10 +46,10 @@ bool dgegs(dVector* x, dVector* q, dMatrix& r)
 
 // Test it out
 int main(int argc, char* argv[]){
-  dVector* x = new dVector[3];
-  dVector* q = new dVector[3];
-  dVector x0(3), x1(3), x2(3);
-  dMatrix r(3, 3);
+  Vector* x = new Vector[3];
+  Vector* q = new Vector[3];
+  Vector x0(3), x1(3), x2(3);
+  Matrix r(3, 3);
   x0[0] = 1.0;
   x0[1] = 0.0;
   x0[2] = 2.0;
@@ -68,9 +67,9 @@ int main(int argc, char* argv[]){
   } else {
     std::cout << "Routine failed!\n";
   }
-  std::cout << dot<double>(q[0], q[1]) << "\n";
-  std::cout << dot<double>(q[0], q[2]) << "\n";
-  std::cout << dot<double>(q[1], q[2]) << "\n";  
+  std::cout << dot(q[0], q[1]) << "\n";
+  std::cout << dot(q[0], q[2]) << "\n";
+  std::cout << dot(q[1], q[2]) << "\n";  
   delete[] x;
   delete[] q;
   return 0;
