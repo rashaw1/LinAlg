@@ -12,8 +12,6 @@
  #include "vector.hpp"
  #include "error.hpp"
 
-typedef double T; // For possible templating later
-
 // Memory clean up function
 void Vector::cleanUp()
 {
@@ -28,18 +26,18 @@ Vector::Vector(int length)
 {
   n = length; // Set length of vector
   if(length > 0){ // Allocate memory
-    v = new T[length];
+    v = new double[length];
   } else {
     v = NULL;
   }
 }
 
 
-Vector::Vector(int length, const T& a)
+Vector::Vector(int length, const double& a)
 {
   n = length; // Set length of vector
   if(length > 0){ // Allocate memory and set all values to a
-    v = new T[length];
+    v = new double[length];
     for(int i=0; i<length; i++){
       v[i] = a;
     }
@@ -49,11 +47,11 @@ Vector::Vector(int length, const T& a)
 }
 
 
-Vector::Vector(int length, const T* a)
+Vector::Vector(int length, const double* a)
 {
   n = length; // Set length
   if (length > 0) { // Allocate memory, and copy a into vector
-    v = new T[length];
+    v = new double[length];
     for(int i = 0; i < length; i++){
       v[i] = a[i]; // Really hope that a is the right length!
     }
@@ -68,7 +66,7 @@ Vector::Vector(const Vector& u)
 {
   n = u.size(); // Get size
   if(n > 0) { // Allocate size, and copy in values
-    v = new T[n];
+    v = new double[n];
     for (int i = 0; i < n; i++) {
       v[i] = u.v[i];
     }
@@ -91,7 +89,7 @@ void Vector::resize(int length) // Resize with loss of values
   cleanUp(); // Deallocate old memory
   n = length; // Reset size
   if (length > 0) { // Reallocate memory
-    v = new T[length];
+    v = new double[length];
   } else {
     v = NULL;
   }
@@ -100,9 +98,9 @@ void Vector::resize(int length) // Resize with loss of values
 
 void Vector::resizeCopy(int length) { 
   // Resizes, keeping as many values as fit
-  T* tempV;
+  double* tempV;
   if ( n > 0 ) {
-    tempV = new T[n]; // Store old values
+    tempV = new double[n]; // Store old values
     for (int i = 0; i < n; i++) {
       tempV[i] = v[i];
     }
@@ -119,7 +117,7 @@ void Vector::resizeCopy(int length) {
 }
 
 
-void Vector::assign(int length, const T& a) // Resizes, setting all vals to a
+void Vector::assign(int length, const double& a) // Resizes, setting all vals to a
 {
   // Do resizing
   resize(length);
@@ -133,21 +131,21 @@ void Vector::assign(int length, const T& a) // Resizes, setting all vals to a
 
 // Overloaded operators
 
-T& Vector::operator[](int i) // Return v[i]
+double& Vector::operator[](int i) // Return v[i]
 {
   // No bounds checking
   return v[i];
 }
 
 
-T Vector::operator[](int i) const // Return by value
+double Vector::operator[](int i) const // Return by value
 {
   // No bounds checking
   return v[i];
 }
 
 
-T Vector::operator()(int i) const // Return by value
+double Vector::operator()(int i) const // Return by value
 {
   // No bounds checking
   return v[i];

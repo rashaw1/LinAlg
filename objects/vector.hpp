@@ -16,17 +16,16 @@
 
 class Vector
 {
-  typedef double T; // Leave room for templating later
 private:
   int n; // The number of elements
-  T* v; // The elements themselves
+  double* v; // The elements themselves
   void cleanUp(); // Deallocates memory
 public:
   // Constructors and destructor
   Vector() : n(0), v(NULL) {} // Default constructor, zero length vector
   Vector(int length); // Empty vector of length length
-  Vector(int length, const T& a); // Vector with 'length' values, all a
-  Vector(int length, const T* a); // Initialise vector to array a
+  Vector(int length, const double& a); // Vector with 'length' values, all a
+  Vector(int length, const double* a); // Initialise vector to array a
   Vector(const Vector& u); // Copy constructor
   ~Vector(); // Destructor
   // Accessors
@@ -35,11 +34,11 @@ public:
   void resize(int length); // Resizes the vector to length 'length',
                            // without preserving values
   void resizeCopy(int length); // Resizes and preserves values up to length
-  void assign(int length, const T& a); // Resizes and sets elements to a
+  void assign(int length, const double& a); // Resizes and sets elements to a
   // Overloaded operators
-  T& operator[](int i); // Access value at index i
-  T operator[](int i) const; // Return by value
-  T operator()(int i) const; // Also return by value
+  double& operator[](int i); // Access value at index i
+  double operator[](int i) const; // Return by value
+  double operator()(int i) const; // Also return by value
   Vector& operator=(const Vector& u); // Set this = u
   // Unary operators
   Vector operator+() const; 
@@ -47,7 +46,7 @@ public:
   // Binary operators
   Vector operator+(const Vector& u) const;
   Vector operator-(const Vector& u) const;
-  Vector& operator*=(const T& scalar) { return *this; } // Scalar multiplication
+  Vector& operator*=(const double& scalar) { return *this; } // Scalar multiplication
   Vector& operator*=(const Matrix& mat) { return *this; } // Vector x matrix
 };
 // Inline functions

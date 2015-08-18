@@ -11,9 +11,7 @@
  #include "matrix.hpp"
  #include "error.hpp"
  
-typedef double T; // Possibly template later
-
- // Clean up utility for memory deallocation
+// Clean up utility for memory deallocation
 
 void Matrix::cleanUp()
 {
@@ -40,11 +38,11 @@ Matrix::Matrix(int m, int n)
   // Allocate memory
   if (m > 0) {
     // Start with rows
-    arr = new T* [m];
+    arr = new double* [m];
     // then columns
     for (int i = 0; i < m; i++){
       if (n > 0) {
-	arr[i] = new T[n];
+	arr[i] = new double[n];
       } else {
 	arr[i] = NULL;
       }
@@ -57,7 +55,7 @@ Matrix::Matrix(int m, int n)
 
 // Same again, but initialise all elements to a
 
-Matrix::Matrix(int m, int n, const T& a)
+Matrix::Matrix(int m, int n, const double& a)
 {
   // Set no. of rows and columns                            
   rows = m;
@@ -65,11 +63,11 @@ Matrix::Matrix(int m, int n, const T& a)
   // Allocate memory                                                                         
   if (m> 0) {
     // Start with rows                                                               
-    arr = new T* [m];
+    arr = new double* [m];
     // then columns                                                               
     for(int i = 0; i < m; i++){
       if (n > 0) {
-	arr[i] = new T[n];
+	arr[i] = new double[n];
 	// Set elements to a
 	for (int j = 0; j < n; j++) {
 	  arr[i][j] = a;
@@ -85,7 +83,7 @@ Matrix::Matrix(int m, int n, const T& a)
 
 // Same again, but now initialise all rows to a given vector, a
 
-Matrix::Matrix(int m, int n, const T* a)
+Matrix::Matrix(int m, int n, const double* a)
 {
   // Set no. of rows and columns                      
   rows = m;
@@ -93,11 +91,11 @@ Matrix::Matrix(int m, int n, const T* a)
   // Allocate memory                                                   
   if (m> 0) {
     // Start with rows                                                          
-    arr = new T* [m];
+    arr = new double* [m];
     // then columns                                                                 
     for(int i = 0; i <m; i++){
       if (n > 0) {
-	arr[i] = new T[n];
+	arr[i] = new double[n];
 	// Set elements - hope a is length n!
 	for (int j = 0; j < n; j++){
 	  arr[i][j] = a[j];
@@ -120,11 +118,11 @@ Matrix::Matrix(const Matrix& other)
   cols = other.ncols();
   if (rows > 0) {
     // Allocate memory for rows
-    arr = new T* [rows];
+    arr = new double* [rows];
     for (int i = 0; i < rows; i++){
       if (cols > 0){
 	// Allocate memory for cols
-	arr[i] = new T[cols];
+	arr[i] = new double[cols];
 	// Copy in values
 	for (int j = 0; j < cols; j++){
 	  arr[i][j] = other.arr[i][j];
@@ -160,11 +158,11 @@ void Matrix::resize(int m, int n)
   // Reallocate memory
   if (m> 0) {
     // Start with rows                                                       
-    arr = new T* [m];
+    arr = new double* [m];
     // then columns                                                  
     for(int i = 0; i <m; i++){
       if (n > 0) {
-	arr[i] = new T[n];
+	arr[i] = new double[n];
       } else {
         arr[i] = NULL;
       }
@@ -176,7 +174,7 @@ void Matrix::resize(int m, int n)
 
 // Do the above, but setting every element to a
 
-void Matrix::assign(int m, int n, const T& a)
+void Matrix::assign(int m, int n, const double& a)
 {
   //Do the resizing
   resize(m, n);
@@ -194,7 +192,7 @@ void Matrix::assign(int m, int n, const T& a)
 
 // Return pointer to first element of row i
 
-T& Matrix::operator[](int i)
+double& Matrix::operator[](int i)
 {
   // No bounds checking
   return arr[i][0];
@@ -202,7 +200,7 @@ T& Matrix::operator[](int i)
 
 // Return pointer to element ij
 
-T& Matrix::operator()(int i, int j)
+double& Matrix::operator()(int i, int j)
 {
   // No bounds checking
   return arr[i][j];
@@ -210,7 +208,7 @@ T& Matrix::operator()(int i, int j)
 
 // Return by value
 
-T Matrix::operator()(int i, int j) const
+double Matrix::operator()(int i, int j) const
 {
   // No bounds checking
   return arr[i][j];
@@ -309,7 +307,7 @@ Matrix Matrix::operator-(const Matrix& other) const
 
 // Scalar multiplication
 
-inline Matrix operator*(const T& scalar, const Matrix& m) 
+inline Matrix operator*(const double& scalar, const Matrix& m) 
 {
   // Make return matrix of correct size
   Matrix rMat(m.nrows(), m.ncols());
@@ -322,7 +320,7 @@ inline Matrix operator*(const T& scalar, const Matrix& m)
   return rMat;
 }
 
-inline Matrix operator*(const Matrix& m, const T& scalar) 
+inline Matrix operator*(const Matrix& m, const double& scalar) 
 {
   // Make return matrix of correct size
   Matrix rMat(m.nrows(), m.ncols());
