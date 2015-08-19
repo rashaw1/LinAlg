@@ -15,8 +15,7 @@
 #ifndef MATRIXHEADERDEF
 #define MATRIXHEADERDEF
 
-// Forward dependencies
-class Error;
+#include "error.hpp"
 
 class Matrix
 {
@@ -55,5 +54,33 @@ public:
   // Intrinsic functions
   Matrix transpose() const; // Return the transpose of the matrix
 };
+
+// Scalar multiplication
+
+inline Matrix operator*(const double& scalar, const Matrix& m) 
+{
+  // Make return matrix of correct size
+  Matrix rMat(m.nrows(), m.ncols());
+  // Multiply elements by scalar
+  for (int i = 0; i < m.nrows(); i++){
+    for (int j = 0; j < m.ncols(); j++){
+      rMat(i, j) *= m(i, j)*scalar;
+    }
+  }
+  return rMat;
+}
+
+inline Matrix operator*(const Matrix& m, const double& scalar) 
+{
+  // Make return matrix of correct size
+  Matrix rMat(m.nrows(), m.ncols());
+  // Multiply elements by scalar
+  for (int i = 0; i < m.nrows(); i++){
+    for (int j = 0; j < m.ncols(); j++){
+      rMat(i, j) *= m(i, j)*scalar;
+    }
+  }
+  return rMat;
+}
 
 #endif

@@ -48,8 +48,12 @@ public:
   Vector operator-(const Vector& u) const;
   Vector& operator*=(const double& scalar) { return *this; } // Scalar multiplication
   Vector& operator*=(const Matrix& mat) { return *this; } // Vector x matrix
+  // Friend functions
+  friend double pnorm(const Vector& u, int p = 2); // Returns the p-norm of u
+  // Calculate the inner (dot) product of two vectors
+  friend double inner(const Vector& u, const Vector& w);
 };
-// Inline functions
+
 // Scalar multiplication
 
 inline Vector operator*(const double& scalar, const Vector& v)
@@ -61,7 +65,6 @@ inline Vector operator*(const double& scalar, const Vector& v)
   }
   return rvec;
 }
-
 
 inline Vector operator*(const Vector& v, const double& scalar)
 {
@@ -114,5 +117,6 @@ inline Vector operator*(const Matrix& mat, const Vector& v)
   }
   return rVec;
 }
+
 
 #endif

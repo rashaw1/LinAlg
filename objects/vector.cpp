@@ -5,13 +5,12 @@
  *   ============================================================================
  *   14/08/15           Robert Shaw             Original code.
  *   15/08/15           Robert Shaw             Added error handling.
- *
+ *   19/08/15           Robert Shaw             Added p-norm and dot product.
  */
  
- #include "matrix.hpp"
  #include "vector.hpp"
- #include "error.hpp"
-
+ #include <cmath>
+ 
 // Memory clean up function
 void Vector::cleanUp()
 {
@@ -216,3 +215,38 @@ Vector Vector::operator-(const Vector& u) const
    }
   return rvec;
 }
+
+// Friend functions
+// Inner (dot) product of two vectors
+double inner(const Vector& u, const Vector& w)
+{
+  double rVal = 0.0; // Return value
+  // Get lengths of vectors, check they match
+  int usize = u.size();
+  int wsize = w.size();
+  if(usize == wsize){
+    // Calculate inner product
+    for (int i = 0; i < usize; i++){
+      rVal += u(i)*w(i); // Round brackets return by value, not reference
+    }
+  } else { // Throw error, and return null vector
+    throw( Error("VECDOT", "Vectors different sizes.") );
+  }
+  return rVal;
+}
+
+// Calculate p-norm of vector u
+// Default to 2-norm, p should be greater than 0, but no check is given
+// the routine will just return 0.0 if p <= 0.
+double pnorm(const Vector& u, int p) 
+{
+  int usize = u.size();
+  double rVal = 0.0; // Initialise return value
+  for (int i = 0; i < usize; i++) {
+    // Calculate (p-norm)^p
+    rVal += std::pow(u(i), p);
+  }
+  rVal = std::pow(rVal, (1.0/p));
+  return rVal;
+}
+

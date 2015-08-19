@@ -9,7 +9,6 @@
  */
  
  #include "matrix.hpp"
- #include "error.hpp"
  
 // Clean up utility for memory deallocation
 
@@ -300,34 +299,6 @@ Matrix Matrix::operator-(const Matrix& other) const
   for (int i = 0; i < rowsize; i++){
     for (int j = 0; j < colsize; j++){
       rMat(i, j) = arr[i][j] - other.arr[i][j]; // Left to right operator
-    }
-  }
-  return rMat;
-}
-
-// Scalar multiplication
-
-inline Matrix operator*(const double& scalar, const Matrix& m) 
-{
-  // Make return matrix of correct size
-  Matrix rMat(m.nrows(), m.ncols());
-  // Multiply elements by scalar
-  for (int i = 0; i < m.nrows(); i++){
-    for (int j = 0; j < m.ncols(); j++){
-      rMat(i, j) *= m(i, j)*scalar;
-    }
-  }
-  return rMat;
-}
-
-inline Matrix operator*(const Matrix& m, const double& scalar) 
-{
-  // Make return matrix of correct size
-  Matrix rMat(m.nrows(), m.ncols());
-  // Multiply elements by scalar
-  for (int i = 0; i < m.nrows(); i++){
-    for (int j = 0; j < m.ncols(); j++){
-      rMat(i, j) *= m(i, j)*scalar;
     }
   }
   return rMat;
