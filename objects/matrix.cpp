@@ -9,6 +9,8 @@
  */
  
  #include "matrix.hpp"
+ #include "vector.hpp"
+#include <cmath>
  
 // Clean up utility for memory deallocation
 
@@ -143,6 +145,59 @@ Matrix::~Matrix()
   cleanUp();
 }
 
+// Accessors
+// Get a row or column of the matrix as a vector
+Vector Matrix::rowAsVector(int r) const
+{
+  // No bounds checking
+  Vector rVec(cols); // Create a vector with dimension 'cols'
+  // Copy in the values from row r
+  for (int i = 0; i < cols; i++){
+    rVec[i] = arr[r][i];
+  }
+  return rVec;
+}
+
+Vector Matrix::colAsVector(int c) const
+{
+  // No bounds checking
+  Vector rVec(rows);
+  for (int i = 0; i < rows; i++){
+    rVec[i] = arr[i][c];
+  }
+  return rVec;
+}
+
+// Set a row or column by a vector
+void Matrix::setRow(int r, const Vector& u)
+{
+  // No bounds checking
+  int size = u.size();
+  // Determine whether u or the width of matrix
+  // is smaller
+  size = (cols < size ? cols : size); 
+  // If not the same, throw an error!
+  if ( size != cols ) {
+    throw( Error("SETROW", "Vector and matrix are different sizes.") );
+  }
+  // Proceed anyway, as far as possible
+  for (int i = 0; i < size; i++){
+    arr[r][i] = u(i);
+  }
+}
+
+void Matrix::setCol(int c, const Vector& u)
+{
+  int size = u.size();
+  size = (rows < size ? rows : size);
+  if ( size != rows ) {
+    throw( Error("SETCOL", "Vector and matrix are different sizes.") );
+  }
+  for (int i = 0; i < size; i++ ){
+    arr[i][c] = u(i);
+  }
+}
+  
 // Shaping functions
 
 // Resize to an empty m x n matrix
@@ -318,11 +373,13 @@ Matrix Matrix::operator*(const Matrix& other) const
     throw(Error("MATMULT", "Matrices are incompatible sizes for multiplication."));
   } else {
     // Multiply them
+    Vector lhs(cols); // Store each vector on left hand side
+    Vector rhs(oRows); // Store each vector on right hand side
     for (int i = 0; i < rows; i++){
+      lhs = rowAsVector(i);
       for (int j = 0; j < oCols; j++){
-	for (int k = 0; k < cols; k++){
-	  rMat(i, j) += arr[i][k]*other.arr[k][j];
-	}
+	rhs = other.colAsVector(j);
+	rMat(i, j) = inner(lhs, rhs); // Take dot product
       }
     }
   }
@@ -344,3 +401,76 @@ Matrix Matrix::transpose() const
   }
   return rMat;
 }
+
+// Pretty print
+void Matrix::print() const
+{
+  // Prints vectors by row
+  Vector temp(cols);
+  for (int i = 0; i < rows; i++) {
+    temp = rowAsVector(i);
+    temp.print();
+  }
+}
+
+// Friend functions
+
+// Calculate the induced matrix p-norm 
+// note that, like with vectors, the infinity norm is p=0
+double pnorm(const Matrix& m, int p)
+{
+  double rval = 0.0; // Return value
+  // Get number of rows and cols in m
+  int cols = m.ncols();  
+  int rows = m.nrows();
+  // Switch p, as each norm is different! (unlike with vectors)
+  switch(p){
+  case 0: // The induced infinity norm is the maximum row sum
+    {  Vector temp1(cols); // Make a temporary vector to store each row
+    double tval1; // Temporary norm value
+    for (int i = 0; i < rows; i++) { // Loop over rows
+      temp1 = m.rowAsVector(i);
+      tval1 = pnorm(temp1, 1); // Get 1-norm (i.e. sum of values)
+      // Change rval if tval is bigger
+      rval = (tval1 > rval ? tval1 : rval);
+    }
+    }
+    break;
+  case 1: // The induced 1-norm is the maximum col sum
+    {Vector temp2(rows);
+    double tval2;
+    for (int i = 0; i < cols; i++) {
+      temp2 = m.colAsVector(i);
+      tval2 = pnorm(temp2, 1);
+      rval = (tval2 > rval ? tval2 : rval);
+    }
+    }
+    break;
+  case 2:
+    break;
+  default:
+    rval = 0.0;
+  }
+  return rval;
+}
+
+// Return the Frobenius norm of the matrix m, the root sum of squares
+// of all the elements of m. Alternatively, the root of the sum of the
+// 2-norm of each column/row vector, or the root of the trace of
+// the product of m with its adjugate.
+double fnorm(const Matrix& m)
+{
+  double rval = 0.0;
+  // Sum the squares 
+  for (int i = 0; i < m.nrows(); i++) {
+    for (int j = 0; j < m.ncols(); j++) {
+      rval += m(i, j) * m(i, j);
+    }
+  }
+  // Square root
+  rval = std::sqrt(rval);
+  return rval;
+}
+
+    
+  

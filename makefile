@@ -26,7 +26,7 @@ test.o: test.cpp $(ROU)/vroutines.hpp $(OBJ)/vector.hpp $(OBJ)/matrix.hpp $(OBJ)
 $(ROU)/vroutines.o: $(ROU)/vroutines.cpp $(OBJ)/vector.hpp $(OBJ)/matrix.hpp $(OBJ)/error.hpp
 	$(CXX) $(DEBUGFLAGS) $(INCLUDE) -c $(ROU)/vroutines.cpp -o $(ROU)/vroutines.o
 
-$(OBJ)/matrix.o: $(OBJ)/matrix.cpp $(OBJ)/matrix.hpp $(OBJ)/error.hpp
+$(OBJ)/matrix.o: $(OBJ)/matrix.cpp $(OBJ)/matrix.hpp $(OBJ)/error.hpp $(OBJ)/vector.hpp
 	$(CXX) $(DEBUGFLAGS) $(INCLUDE) -c $(OBJ)/matrix.cpp -o $(OBJ)/matrix.o
 
 $(OBJ)/vector.o: $(OBJ)/vector.cpp $(OBJ)/vector.hpp $(OBJ)/error.hpp $(OBJ)/matrix.hpp

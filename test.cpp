@@ -7,31 +7,22 @@
 #include <iostream>
 
 int main(int argc, char* argv[]){
-  Vector* x = new Vector[3];
-  Vector* q = new Vector[3];
-  Vector x0(3), x1(3), x2(3);
+  Matrix x(3, 3);
+  Matrix q(3, 3);
   Matrix r(3, 3);
-  x0[0] = 1.0;
-  x0[1] = 0.0;
-  x0[2] = 2.0;
-  x1[0] = 2.0;
-  x1[1] = 3.0;
-  x1[2] = 0.0;
-  x2[0] = 4.0;
-  x2[1] = 2.0;
-  x2[2] = 1.0;
-  x[0] = x0; x[1] = x1; x[2] = x2;
-  if(dgegs(x, q, r)){
-    for (int i = 0; i < 3; i++){
-      std::cout << q[0][i] << "\t" << q[1][i] << "\t" << q[2][i] << "\n";
-    }
+  x(0, 0) = 1.0; x(0, 1) = 0.0; x(0, 2) = 2.0;
+  x(1, 0) = 2.0; x(1, 1) = 3.0; x(1, 2) = 0.0;
+  x(2, 0) = 4.0; x(2, 1) = 2.0; x(2, 2) = 1.0;
+  if(dgegs(x, q, r, 1E-12)){
+    x.print();
+    std::cout << "\n\n";
+    q.print();
+    std::cout << "\n\n";
+    r.print();
+    std::cout << "\n\n";
+    x = q*r;
+    x.print();
   } else {
     std::cout << "Routine failed!\n";
   }
-  std::cout << inner(q[0], q[1]) << "\n";
-  std::cout << inner(q[0], q[2]) << "\n";
-  std::cout << inner(q[1], q[2]) << "\n";
-  delete[] x;
-  delete[] q;
-  return 0;
 }

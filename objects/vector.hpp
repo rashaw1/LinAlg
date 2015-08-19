@@ -48,10 +48,14 @@ public:
   Vector operator-(const Vector& u) const;
   Vector& operator*=(const double& scalar) { return *this; } // Scalar multiplication
   Vector& operator*=(const Matrix& mat) { return *this; } // Vector x matrix
+  // Intrinsic functions
+  void print(double PRECISION = 1E-14) const; // Pretty prints the vector to primary ostream
   // Friend functions
   friend double pnorm(const Vector& u, int p = 2); // Returns the p-norm of u
   // Calculate the inner (dot) product of two vectors
   friend double inner(const Vector& u, const Vector& w);
+  // Return angle (in radians) between two vectors
+  friend double angle(const Vector& u, const Vector& w);
 };
 
 // Scalar multiplication

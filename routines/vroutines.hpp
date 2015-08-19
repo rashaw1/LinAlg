@@ -13,7 +13,8 @@ class Vector;
 class Error;
 
 // Declare the modified Gram-Schmidt procedure
-// Which takes a set of vectors x and returns them as the set of 
-// orthogonal vectors q, whilst generating the transform matrix r
-// Returns true if successful, false if failed
-bool dgegs(Vector* x, Vector* q, Matrix& r); 
+// which takes a set of vectors in a full-rank
+// matrix x, returning the orthogonalised vectors
+// in a matrix q, and the transformation matrix r.
+// Returns true if successful.
+bool dgegs(const Matrix& x, Matrix& q, Matrix& r, const double PRECISION); 

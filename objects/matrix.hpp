@@ -15,6 +15,9 @@
 #ifndef MATRIXHEADERDEF
 #define MATRIXHEADERDEF
 
+// Declare forward dependencies
+class Vector;
+
 #include "error.hpp"
 
 class Matrix
@@ -35,6 +38,10 @@ public:
   // Accessors
   int nrows() const { return rows; } // Returns no. of rows
   int ncols() const { return cols; } // Returns no. of cols  
+  Vector rowAsVector(int r) const; //Returns row r as a vector
+  Vector colAsVector(int c) const; //Returns col c as a vector
+  void setRow(int r, const Vector& u); // Sets row r to be the vector u
+  void setCol(int c, const Vector& u); // Sets col c to be the vector u
   // Shaping functions
   void resize(int m, int n); // Resize to empty m x n matrix
   void assign(int m, int n, const T& a); // Resize, setting all entries to a
@@ -53,6 +60,10 @@ public:
   Matrix operator*(const Matrix& other) const; // Matrix x matrix
   // Intrinsic functions
   Matrix transpose() const; // Return the transpose of the matrix
+  void print() const; // Pretty prints the matrix to primary ostream 
+  // Friend functions
+  friend double pnorm(const Matrix& m, int p); // The induced matrix p-norm
+  friend double fnorm(const Matrix& m); // Calculate the Frobenius norm
 };
 
 // Scalar multiplication

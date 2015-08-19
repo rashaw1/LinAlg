@@ -10,6 +10,8 @@
  
  #include "vector.hpp"
  #include <cmath>
+#include <iostream>
+#include <iomanip>
  
 // Memory clean up function
 void Vector::cleanUp()
@@ -216,6 +218,21 @@ Vector Vector::operator-(const Vector& u) const
   return rvec;
 }
 
+// Intrinsic functions
+
+// Pretty print
+void Vector::print(double PRECISION) const 
+{
+  double val = 0.0; // Temp printing float, to avoid tiny, tiny numbers
+  for (int i = 0; i < n; i++){
+    if (v[i] > PRECISION){
+      val = v[i];
+    }
+    std::cout << std::setprecision(18) << std::setw(25) << val;
+  }
+  std::cout << "\n";
+}
+
 // Friend functions
 // Inner (dot) product of two vectors
 double inner(const Vector& u, const Vector& w)
@@ -235,18 +252,43 @@ double inner(const Vector& u, const Vector& w)
   return rVal;
 }
 
-// Calculate p-norm of vector u
-// Default to 2-norm, p should be greater than 0, but no check is given
-// the routine will just return 0.0 if p <= 0.
+// Calculate p-norm of vector u.
+// Default to 2-norm, p should be greater than or equal to 0, but no check is given.
+// p=0 will give the infinity norm as there isn't an appropriate symbol for infinity
+// (and a 0-norm would be pointless).
 double pnorm(const Vector& u, int p) 
 {
   int usize = u.size();
   double rVal = 0.0; // Initialise return value
-  for (int i = 0; i < usize; i++) {
-    // Calculate (p-norm)^p
-    rVal += std::pow(u(i), p);
+  // Check if infinity norm
+  if (p == 0){
+    // Find the maximum element
+    for (int i = 0; i < usize; i++){
+      rVal = (u(i) > rVal ? u(i) : rVal);
+    }
+  } else {
+    for (int i = 0; i < usize; i++) {
+      // Calculate (p-norm)^p
+      rVal += std::pow(u(i), p);   
+    }
+    rVal = std::pow(rVal, 1.0/(double(p)));
   }
-  rVal = std::pow(rVal, (1.0/p));
   return rVal;
 }
 
+// Get the angle between two vectors
+double angle(const Vector& u, const Vector& w)
+{
+  // Get the magnitudes of the vectors
+  double unorm = pnorm(u);
+  double wnorm = pnorm(w);
+  // Get the dot product
+  double dprod = inner(u, w);
+  // Use the cosine rule
+  // but make sure neither is a zero vector
+  double rval = 0.0;
+  if(dprod > 1E-12){
+    rval = std::acos(dprod/(unorm*wnorm));
+  }
+  return rval;
+}
