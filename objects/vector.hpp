@@ -35,6 +35,7 @@ public:
                            // without preserving values
   void resizeCopy(int length); // Resizes and preserves values up to length
   void assign(int length, const double& a); // Resizes and sets elements to a
+  void swap(int i, int j); // Swaps elements i and j
   // Overloaded operators
   double& operator[](int i); // Access value at index i
   double operator[](int i) const; // Return by value
@@ -49,11 +50,15 @@ public:
   Vector& operator*=(const double& scalar) { return *this; } // Scalar multiplication
   Vector& operator*=(const Matrix& mat) { return *this; } // Vector x matrix
   // Intrinsic functions
-  void print(double PRECISION = 1E-14) const; // Pretty prints the vector to primary ostream
+  void print(double PRECISION = 1e-12) const; // Pretty prints the vector to primary ostream
+  Vector sorted() const; // Returns a sorted copy of the vector
+  void sort(); // Sorts the vector into ascending order, uses quicksort 
   // Friend functions
   friend double pnorm(const Vector& u, int p = 2); // Returns the p-norm of u
   // Calculate the inner (dot) product of two vectors
   friend double inner(const Vector& u, const Vector& w);
+  // Calculate the outer product of two vectors
+  friend Matrix outer(const Vector& u, const Vector& w);
   // Return angle (in radians) between two vectors
   friend double angle(const Vector& u, const Vector& w);
 };
@@ -94,9 +99,9 @@ inline Vector operator*(const Vector& v, const Matrix& mat)
     throw(Error("VECMATMULT", "Vector and matrix are wrong sizes to multiply."));
   } else { // Do the multiplication                                         
     for (int i = 0; i < cols; i++){
-      for (int j = 0; j < n; j++){
-        rVec[i] += v[j]*mat(j, i);
-      }
+      Vector temp(rows); // Get each column of the matrix
+      temp = mat.colAsVector(i);
+      rVec[i] = inner(v, temp);
     }
   }
   return rVec;
@@ -114,9 +119,9 @@ inline Vector operator*(const Matrix& mat, const Vector& v)
     throw(Error("MATVECMULT", "Vector and matrix are wrong sizes to multiply."));
   } else { // Do the multiplication                                                                            
     for (int i = 0; i < rows; i++){
-      for (int j = 0; j < n; j++){
-        rVec[i] += mat(i, j)*v[j];
-      }
+      Vector temp(cols);
+      temp = mat.rowAsVector(i);
+      rVec[i] = inner(v, temp);
     }
   }
   return rVec;

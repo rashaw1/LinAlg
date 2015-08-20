@@ -306,7 +306,7 @@ Matrix Matrix::operator-() const
   Matrix rMat(rows, cols);
   for (int i = 0; i < rows; i++){
     for (int j = 0; j < cols; j++){
-      rMat(i, j) = -arr[i][j];
+      rMat(i, j) = -1.0*arr[i][j];
     }
   }
   return rMat;
@@ -330,7 +330,7 @@ Matrix Matrix::operator+(const Matrix& other) const
   Matrix rMat(rowsize, colsize);
   for (int i = 0; i < rowsize; i++){
     for (int j = 0; j < colsize; j++){
-      rMat(i, j) = arr[i][j] + other.arr[i][j];
+      rMat(i, j) = arr[i][j] + other(i, j);
     }
   }
   return rMat;
@@ -353,7 +353,7 @@ Matrix Matrix::operator-(const Matrix& other) const
   Matrix rMat(rowsize, colsize);
   for (int i = 0; i < rowsize; i++){
     for (int j = 0; j < colsize; j++){
-      rMat(i, j) = arr[i][j] - other.arr[i][j]; // Left to right operator
+      rMat(i, j) = arr[i][j] - other(i, j); // Left to right operator
     }
   }
   return rMat;
@@ -403,13 +403,13 @@ Matrix Matrix::transpose() const
 }
 
 // Pretty print
-void Matrix::print() const
+void Matrix::print(double PRECISION) const
 {
   // Prints vectors by row
   Vector temp(cols);
   for (int i = 0; i < rows; i++) {
     temp = rowAsVector(i);
-    temp.print();
+    temp.print(PRECISION);
   }
 }
 

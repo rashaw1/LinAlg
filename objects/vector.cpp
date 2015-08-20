@@ -10,6 +10,7 @@
  
  #include "vector.hpp"
  #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
  
@@ -130,6 +131,15 @@ void Vector::assign(int length, const double& a) // Resizes, setting all vals to
   }
 }
 
+// Swap elements i and j
+void Vector::swap(int i, int j)
+{
+  double temp = v[i];
+  v[i] = v[j];
+  v[j] = temp;
+}
+
+
 // Overloaded operators
 
 double& Vector::operator[](int i) // Return v[i]
@@ -225,14 +235,96 @@ void Vector::print(double PRECISION) const
 {
   double val = 0.0; // Temp printing float, to avoid tiny, tiny numbers
   for (int i = 0; i < n; i++){
-    if (v[i] > PRECISION){
+    if (fabs(v[i]) > PRECISION){
       val = v[i];
-    }
-    std::cout << std::setprecision(18) << std::setw(25) << val;
+    } else { val = 0.0; }
+    std::cout << std::setprecision(8) << std::setw(14) << val;
   }
   std::cout << "\n";
 }
 
+// Sort the vector into ascending order, using a quicksort algorithm
+void Vector::sort()
+{
+  if (n > 1) { // Don't bother sorting if only one element (or none!)
+  int pivot = rand() % n; // Randomly choose a pivot within length of vector
+  swap(n-1, pivot); // Swap the last value in vector with pivot value
+  int i, k, p; // Indices for main loop
+  i = 0; k = 0; p = n-1;
+  // Begin main loop
+  while(i < p){
+    // Check whether smaller than pivot value
+    if (v[i] < v[n-1]) { // Move small values to left
+      swap(i, k);
+      i++; k++; // Increment i and k
+    } else if (v[i] - v[n-1] < 1E-14) { // If they are equal
+      swap(i, p-1); // Move equal values to the end 
+      p--; 
+    } else {
+      i++; // Do nothing, but increment counter
+    }
+  }
+  // Now k = the position of the first element in the 'bigger than pivot' list
+  // and p = the position of the first element in the 'equal to pivot' list
+  // n - p is thus the number of elements equal to the pivot
+
+  // Move pivots to the center
+  // m is the size of the smaller of the 'equal to' and 'bigger than' lists
+  int m = (p-k < n-p ? p-k : n-p);
+  // Copy all the 'equal to' pivots so that first element is at k
+  if ( m > 0 ) {
+    for(int j = 0; j < m; j++){ 
+      swap(j+k, n-m+j);
+    }
+  }
+  // Now k is the position of the first element of the 'equal' to list
+  // so k-1 is where the 'smaller than' list ends
+  // and the 'bigger than list' starts at k + n - p
+
+  // Sort the subvectors recursively
+  // Sort the left list, if it exists
+  if (k > 0) {
+    // Make temp array
+    double* temp = new double[k];
+    // Copy values from vector
+    for (int a = 0; a < k; a++){
+      temp[a] = v[a];
+    }
+    Vector s1(k, temp);
+    delete[] temp;
+    s1.sort();
+    // Copy values back in
+    for (int a = 0; a < k; a++){
+      v[a] = s1(a);
+    }
+  }
+  // Sort the right list, if it exists
+  if (m > 0) {
+    // Make temp array                                            
+    double* temp = new double[p-k];
+    // Copy values from vector                                               
+    for(int a = 0; a <p-k; a++){
+      temp[a] =v[n-p+k+a];
+    }
+    Vector s2(p-k, temp);
+    delete[] temp;
+    s2.sort();
+    // Copy values back in
+    for (int a = 0; a < p-k; a++){
+      v[n-p+k+a] = s2(a);
+    }
+  }
+  }
+}
+
+// Return a sorted array without changing the vector
+Vector Vector::sorted() const
+{
+  Vector u(n); // Return vector
+  u = *this;
+  u.sort();
+  return u;
+}
 // Friend functions
 // Inner (dot) product of two vectors
 double inner(const Vector& u, const Vector& w)
@@ -250,6 +342,22 @@ double inner(const Vector& u, const Vector& w)
     throw( Error("VECDOT", "Vectors different sizes.") );
   }
   return rVal;
+}
+
+// Get the outer product of two vectors (a matrix), assuming rhs vector 
+// implies its transpose (otherwise it wouldn't work!)
+Matrix outer(const Vector& u, const Vector& w)
+{
+  int usize = u.size();
+  int wsize = w.size();
+  Matrix rmat(usize, wsize); // Matrix that will be returned
+  for (int i = 0; i < usize; i++){
+    for (int j = 0; j < wsize; j++){
+      // Calculate element ij of rmat
+      rmat(i, j) = u(i)*w(j);
+    }
+  }
+  return rmat;
 }
 
 // Calculate p-norm of vector u.

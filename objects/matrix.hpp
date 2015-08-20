@@ -22,17 +22,16 @@ class Vector;
 
 class Matrix
 {
-	typedef double T; // Leave room for templating
 private:
   int rows, cols; // No. of rows and columns of the matrix
-  T** arr; // 2D array of matrix entries
+  double** arr; // 2D array of matrix entries
   void cleanUp(); // Utility function for memory deallocation
 public:
   // Constructors and destructor
   Matrix() : rows(0), cols(0) {} // Default, forms zero length vector
   Matrix(int m, int n); // Declare an m x n matrix
-  Matrix(int m, int n, const T& a); // Declare m x n matrix, all entries = a
-  Matrix(int m, int n, const T* a); // Matrix of m row copies of n-vector a
+  Matrix(int m, int n, const double& a); // Declare m x n matrix, all entries = a
+  Matrix(int m, int n, const double* a); // Matrix of m row copies of n-vector a
   Matrix(const Matrix& other); // Copy constructor
   ~Matrix(); // Destructor
   // Accessors
@@ -44,11 +43,11 @@ public:
   void setCol(int c, const Vector& u); // Sets col c to be the vector u
   // Shaping functions
   void resize(int m, int n); // Resize to empty m x n matrix
-  void assign(int m, int n, const T& a); // Resize, setting all entries to a
+  void assign(int m, int n, const double& a); // Resize, setting all entries to a
   // Overloaded operators
-  T& operator[](int i); // Return pointer to first element of row i
-  T& operator()(int i, int j); // Return pointer to element ij
-  T operator()(int i, int j) const; // Return by value element ij
+  double& operator[](int i); // Return pointer to first element of row i
+  double& operator()(int i, int j); // Return pointer to element ij
+  double operator()(int i, int j) const; // Return by value element ij
   Matrix& operator=(const Matrix& other); 
   // Unary operators
   Matrix operator+() const; 
@@ -56,11 +55,11 @@ public:
   // Binary operators
   Matrix operator+(const Matrix& other) const;
   Matrix operator-(const Matrix& other) const;
-  Matrix& operator*=(const T& scalar) { return *this; } // Scalar multiplication
+  Matrix& operator*=(const double& scalar) { return *this; } // Scalar multiplication
   Matrix operator*(const Matrix& other) const; // Matrix x matrix
   // Intrinsic functions
   Matrix transpose() const; // Return the transpose of the matrix
-  void print() const; // Pretty prints the matrix to primary ostream 
+  void print(double PRECISION = 1e-12) const; // Pretty prints the matrix to primary ostream 
   // Friend functions
   friend double pnorm(const Matrix& m, int p); // The induced matrix p-norm
   friend double fnorm(const Matrix& m); // Calculate the Frobenius norm
@@ -75,7 +74,7 @@ inline Matrix operator*(const double& scalar, const Matrix& m)
   // Multiply elements by scalar
   for (int i = 0; i < m.nrows(); i++){
     for (int j = 0; j < m.ncols(); j++){
-      rMat(i, j) *= m(i, j)*scalar;
+      rMat(i, j) = m(i, j)*scalar;
     }
   }
   return rMat;
@@ -88,7 +87,7 @@ inline Matrix operator*(const Matrix& m, const double& scalar)
   // Multiply elements by scalar
   for (int i = 0; i < m.nrows(); i++){
     for (int j = 0; j < m.ncols(); j++){
-      rMat(i, j) *= m(i, j)*scalar;
+      rMat(i, j) = m(i, j)*scalar;
     }
   }
   return rMat;
