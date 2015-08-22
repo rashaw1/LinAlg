@@ -270,3 +270,101 @@ void implicitpb(const Vector& p, Vector& b)
     b[p(i)] = temp;
   }
 }
+
+// Compute the Cholesky factorisation of a real symmetric
+// positive definite matrix. Returns the upper triangular
+// matrix R.
+Matrix cholesky(const Matrix& A)
+{
+  int dim = A.nrows(); // Assume square
+  Matrix R;
+  R = A; // Initialise R
+  // Reduce the elements of R symmetrically
+  for (int k = 0; k < dim; k++){
+    for (int j = k+1; j < dim; j++){
+      for (int i = j; i < dim; i++){
+	R(j, i) = R(j, i) - (R(k, j)/R(k, k))*R(k, i);
+      }
+    }
+    double rootval = sqrt(R(k, k));
+    for (int i = k; i < dim; i++){
+      R(k, i) = R(k, i)/rootval;
+    }
+  }
+  // Set sub-diagonal elements to be zero
+  for (int i = 1; i < dim; i++){
+    for (int j = 0; j < i; j++){
+      R(i, j) = 0.0;
+    }
+  }
+  return R;
+}
+
+// Decompose the square matrix x into hessenberg form in y,
+// giving the householder reflectors in v. Returns true if successful.
+bool hessenberg(const Matrix& x, Matrix& y, Matrix& v)
+{
+  bool rval = true;
+  if (x.isSquare()){ // Must be square to proceed
+    int dim = x.nrows();
+    // Make sure v, y are the right size
+    y = x; // Initialise to input matrix
+    v.assign(dim, dim, 0.0); // Make all zeroes 
+    // Begin main loop
+    for (int k = 0; k < dim-2; k++){
+      // Declare temporary vectors
+      Vector xk(dim-k-1); 
+      Vector vk(dim-k-1);
+      // Copy in the values needed
+      for (int i = k+1; i < dim; i++){
+	xk[i-k-1] = y(i, k);
+      }
+      // Compute the reflector
+      // Choose the sign that maxmises distance of reflected vector
+      double val = (xk(0) < 0 ? -1.0*pnorm(xk) : pnorm(xk));
+      vk = xk;
+      vk[0] += val; // Correct leading value
+      vk  = (1.0/pnorm(vk))*vk; // Normalise
+      // Compute the changes to y
+      Matrix temp1(dim-k-1, dim-k);
+      // Copy values needed into temp matrix
+      for (int i = k+1; i < dim; i++){
+	for (int j = k; j < dim; j++){
+	  temp1(i-k-1, j-k) = y(i, j);
+	}
+      }
+      Vector temp2(dim-k-1);
+      temp2 = vk*temp1;
+      temp1 = temp1 - 2.0*outer(vk, temp2);
+      // Copy values back in to y
+      for (int i = k+1; i < dim; i++){
+	for (int j = k; j < dim; j++){
+	  y(i, j) = temp1(i-k-1, j-k);
+	}
+      }
+      // Repeat on other side
+      temp1.resize(dim, dim-k-1);
+      // Copy values into temp matrix
+      for (int i = 0; i < dim; i++){
+	for (int j = k+1; j < dim; j++){
+	  temp1(i, j-k-1) = y(i, j);
+	}
+      }
+      temp2 = temp1*vk;
+      temp1 = temp1 - 2.0*outer(temp2, vk);
+      // Copy values back into y
+      for (int i = 0; i < dim; i++){
+	for (int j = k+1; j < dim; j++){
+	  y(i, j) = temp1(i, j-k-1);
+	}
+      }
+      // Copy reflection vector into v
+      for (int i = k+1; i < dim; i++){
+	v(i, k+1) = vk(i-k-1);
+      }
+    }
+  } else {
+    rval = false; // Algorithm failed
+  }
+  return rval;
+}

@@ -482,6 +482,17 @@ Matrix Matrix::transpose() const
   return rMat;
 }
 
+double Matrix::trace() const
+{
+  double tval = 0.0;
+  if(isSquare()){
+    for (int i = 0; i < rows; i++){
+      tval += arr[i][i];
+    }
+  }
+  return tval;
+}
+
 // Pretty print
 void Matrix::print(double PRECISION) const
 {
@@ -491,6 +502,51 @@ void Matrix::print(double PRECISION) const
     temp = rowAsVector(i);
     temp.print(PRECISION);
   }
+}
+
+// Classifying functions - determine whether the matrix is:
+// Symmetric, square, or upper/lower triangular
+bool Matrix::isSymmetric() const
+{
+  // For it to be symmetric, it must also be square
+  bool rval = isSquare();
+  // Don't need to consider the diagonals
+  int i = 1;
+  while(rval && i < cols){
+    int j = 0;
+    while(rval && j < i){
+      rval = ( fabs(arr[j][i] - arr[i][j]) < 1e-12 );
+      j++;
+    }
+    i++;
+  }
+  return rval;
+}
+
+bool Matrix::isTriangular(bool upper) const{
+  // Triangular needs to be square
+  bool rval = isSquare();
+  int i = 1;
+  if (upper) { // Check whether it is upper triangular
+    while(rval && i < rows){
+      int j = 0;
+      while(rval && j < i){
+	rval = ( fabs(arr[i][j]) < 1e-12 );
+	j++;
+      }
+      i++;
+    }
+  } else { // Check whether it is lower triangular
+    while(rval && i < cols){
+      int j = 0;
+      while(rval && j < i){
+	rval = ( fabs(arr[j][i]) < 1e-12 );
+	j++;
+      }
+      i++;
+    }
+  }
+  return rval;
 }
 
 // Friend functions

@@ -6,6 +6,8 @@
  *    =================================================================
  *    19/08/15            Robert Shaw          Original code.
  *    20/08/15            Robert Shaw          Added Householder.
+ *    21/08/15            Robert Shaw          LU and Cholesky.
+ *    22/08/15            Robert Shaw          Hessenberg added.
  */
 
 // Declare forward dependencies
@@ -25,18 +27,33 @@ bool dgegs(const Matrix& x, Matrix& q, Matrix& r, const double& PRECISION);
 // and a set of reflection vectors, v, from which the q matrix 
 // could be constructed. Returns true if successful 
 bool dgehh(const Matrix& x, Matrix& y, Matrix& v);
+
 // Implicity form product Qx using v from HH decomp
 void implicitqx(const Matrix& v, Vector& x);
+
 // Or Q(T)b instead
 void implicitqtb(const Matrix& v, Vector& b);
+
 // Return the full Q matrix from the HH decomp
 Matrix explicitq(const Matrix& v);
+
 // Get the LU decomposition of A by Gaussian Elimination with 
 // partial pivoting. This actually computes PA = LU, putting L, U
 // into the matrix B, and returning a vector of the row interchanges.
 Vector dgelu(const Matrix& A, Matrix& B);
+
 // Explicitly form the matrix P from the output of dgelu
 Matrix explicitp(const Vector& p);
+
 // Implicitly form Pb, where b is a vector, and P is the permutation
 // matrix from the Gaussian eliminiation
 void implicitpb(const Vector& p, Vector& b); 
+
+// Compute the Cholesky factorisation A = R(T)R for a symmetric
+// positive definite matrix, where R is an upper triangular matrix.
+Matrix cholesky(const Matrix& A);
+
+// Reduce a square matrix x into y in Hessenberg form, using Householder 
+// reflections. It stores the reflectors in matrix v, which can be
+// used implicitly later on. Returns true if successful.
+bool hessenberg(const Matrix& x, Matrix& y, Matrix& v); 

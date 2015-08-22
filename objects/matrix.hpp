@@ -67,7 +67,11 @@ public:
   Matrix operator*(const Matrix& other) const; // Matrix x matrix
   // Intrinsic functions
   Matrix transpose() const; // Return the transpose of the matrix
+  double trace() const;
   void print(double PRECISION = 1e-12) const; // Pretty prints the matrix to primary ostream 
+  bool isSymmetric() const; // Determines whether the matrix is symmetric
+  bool isSquare() const { return ( rows == cols ); }  // Determines whether the matrix is square
+  bool isTriangular(bool upper = true) const; // Determines whether it is upper/lower triangular
   // Friend functions
   friend double pnorm(const Matrix& m, int p); // The induced matrix p-norm
   friend double fnorm(const Matrix& m); // Calculate the Frobenius norm

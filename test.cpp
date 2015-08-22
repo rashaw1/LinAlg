@@ -6,6 +6,7 @@
 #include "vector.hpp"
 #include "error.hpp"
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 
 int main(int argc, char* argv[]){
@@ -60,4 +61,50 @@ int main(int argc, char* argv[]){
   d = d*(1.0/2006.787453080206);
   d = qrsquares(A, d);
   d.print();
+  std::cout << "\n\n";
+  // Test Hessenberg
+  x.resize(5, 5);
+  x(0, 0) = 1.0; x(0, 1) = 2.0; x(0, 2) = 3.0; x(0, 3) = 4.0; x(0, 4) = 2.0;
+  x(1, 0) = 2.0; x(1, 1) = 5.0; x(1, 2) = 6.0; x(1, 3) = 7.0; x(1, 4) = 3.0;
+  x(2, 0) = 3.0; x(2, 1) = 6.0; x(2, 2) = 5.0; x(2, 3) = 0.0; x(2, 4) = 4.0;
+  x(3, 0) = 4.0; x(3, 1) = 7.0; x(3, 2) = 0.0; x(3, 3) = 8.0; x(3, 4) = 3.0;
+  x(4, 0) = 2.0; x(4, 1) = 3.0; x(4, 2) = 4.0; x(4, 3) = 3.0; x(4, 4) = 5.0;
+  Matrix y; Matrix v;
+  if (hessenberg(x, y, v)){
+    x.print();
+    std::cout << "\n\n";
+    y.print();
+    std::cout << "\n\n";
+    v.print();
+    std::cout << "\n\n";
+    v = explicitq(v);
+    v.print();
+    std::cout << "\n\n";
+    x = v*(y*v.transpose());
+    x.print();
+    std::cout << "\n\n";
+  } else {
+    std::cout << "Hessenberg failed.\n";
+  }
+
+  // Test Cholesky
+  x.resize(3, 3);
+  x(0, 0) = x(1, 1) = x(2, 2) = 3.0;
+  x(0, 1) = x(1, 0) = x(1, 2) = x(2, 1) = 2.0;
+  x(0, 2) = x(2, 0) = 0.0;
+  d.resize(3);
+  d[0] = 1.0; d[1] = 3.0; d[2] = 2.0;
+  d = choleskysolve(x, d);
+  d.print();
+  std::cout << "\n\n";
+
+  // Test power method / inverse power method
+  x(0, 0) = 1.0; x(0, 1) = 2.0; x(0, 2) = 3.0;
+  x(1, 0) = 1.0; x(1, 1) = 2.0; x(1, 2) = 1.0;
+  x(2, 0) = 3.0; x(2, 1) = 2.0; x(2, 2) = 1.0;
+  d[0] = -0.1; d[1] = -0.1; d[2] = 0.1;
+  double lam = rayleigh(x, d, -50.0, 1e-10, 30);
+  std::cout << lam << "\n";
+  d.print(1e-10);
+  std::cout << "\n\n";
 }

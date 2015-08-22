@@ -373,7 +373,7 @@ double pnorm(const Vector& u, int p)
   if (p == 0){
     // Find the maximum element
     for (int i = 0; i < usize; i++){
-      rVal = (u(i) > rVal ? u(i) : rVal);
+      rVal = (fabs(u(i)) > rVal ? fabs(u(i)) : rVal);
     }
   } else {
     for (int i = 0; i < usize; i++) {
