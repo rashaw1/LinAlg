@@ -6,6 +6,8 @@
  *     =====================================================================
  *     13/08/15         Robert Shaw           Original code
  *     14/08/15         Robert Shaw           Added error throwing.
+ *     20/08/15         Robert Shaw           Added outer product, angle,
+ *                                            and sorting.
  */
 
 #ifndef VECTORHEADERDEF

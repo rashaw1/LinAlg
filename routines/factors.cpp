@@ -1,10 +1,11 @@
-// Implements vroutines.hpp
+// Implements factors.hpp
 
 #include "vector.hpp"
 #include "matrix.hpp"
 #include "error.hpp"
-#include "vroutines.hpp"
+#include "factors.hpp"
 #include <iostream>
+#include <cmath>
 
 // Gram-Schmidt orthonormalises the columns of x, into the column 
 // vectors of q, whilst generating the transformation matrix r,
@@ -120,7 +121,7 @@ void implicitqx(const Matrix& v, Vector& x)
   int m = v.nrows();
   int n = v.ncols();
   // Begin main loop
-  for (int k = n-1; k >= 0; k--) {
+  for (int k = n-1; k > -1; k--) {
     Vector temp(m-k); // Temporary vector of correct size
     Vector vk(m-k); 
     // Transfer values
@@ -142,7 +143,7 @@ void implicitqx(const Matrix& v, Vector& x)
 // Calculate the product Q(T)b of the Q matrix using the HH
 // decomposition, with a vector b - implicitly, i.e. without
 // ever forming Q
-void implictqtb(const Matrix& v, Vector& b)
+void implicitqtb(const Matrix& v, Vector& b)
 {
   int m = v.nrows();
   int n = v.ncols();
@@ -153,7 +154,7 @@ void implictqtb(const Matrix& v, Vector& b)
     // Copy values in
     for (int i = k; i < m; i++) {
       temp[i-k] = b(i);
-      vk[i-k] = v(i-k, k);
+      vk[i-k] = v(i, k);
     }
     double dval = inner(vk, temp);
     vk = dval*vk;
@@ -166,14 +167,14 @@ void implictqtb(const Matrix& v, Vector& b)
 }   
 
 // Form explicitly the Q matrix from the HH decomposition
-Matrix implicitq(const Matrix& v)
+Matrix explicitq(const Matrix& v)
 {
   int m = v.nrows();
   int n = v.ncols();
   Matrix rmat(m, n); // Return matrix
   // Do implicitqx for x = the identity vector in each dimension
   for (int i = 0; i < n; i++) {
-    Vector temp(n, 0.0); // Temporary vector of all zeroes
+    Vector temp(m, 0.0); // Temporary vector of all zeroes
     temp[i] = 1.0; // Turn into the identity
     implicitqx(v, temp); // Get the ith column of q
     rmat.setCol(i, temp); // Set the ith column of q 
@@ -181,3 +182,91 @@ Matrix implicitq(const Matrix& v)
   return rmat;
 }
   
+// Gaussian elimination with partial pivoting LU decomposition
+// assumes matrix is square (as nobody uses it otherwise!)
+// Both L and U are stored in B.
+// Returns a vector p with the order in which rows were interchanged
+Vector dgelu(const Matrix& A, Matrix& B) 
+{
+  int dim = A.nrows(); // Assume square
+  B = A; // Copy A into B
+  Vector p(dim-1); // For returning the permutations at each step
+  Matrix L(dim, dim, 0.0); // Matrix of all zeroes
+  // Set L to be the identity
+  for (int i = 0; i < dim; i++){
+    L(i, i) = 1.0;
+  }
+
+  // Begin main algorithm
+  for (int k = 0; k < dim-1; k++){
+    // Find the pivot in column k
+    int pivot = k;
+    double testval = B(k, k);
+    // Choose the pivot as the biggest (by absolute value)
+    // element in column k
+    for (int i = k+1; i < dim; i++){
+      if(fabs(B(i, k)) > testval){
+	pivot = i;
+      }
+    }
+    // Interchange rows for submatrices of B and L
+    B.swapRows(k, pivot, k); // Only swap latter part of row
+    L.swapRows(k, pivot, 0, k); // Only swap front part of row
+    // Store that at step k, row pivot was swapped
+    p[k] = pivot;
+    // Do the elimination step
+    for (int j = k+1; j < dim; j++){
+      L(j, k) = B(j, k)/B(k, k);
+      for (int a = k; a < dim; a++){
+	B(j, a) = B(j, a) - L(j, k)*B(k, a);
+      }
+    }
+  }
+  // B and L are now upper and lower triangular, respectively
+  // and L has ones on the diagonal, so we store L in B
+  for (int i = 1; i < dim; i++){ // Loop through rows
+    for (int j = 0; j < i; j++) { // And portions of columns
+      B(i, j) = L(i, j);
+    }
+  }
+  return p;
+}
+
+// Explicitly form the permutation matrix from the output of dgelu
+Matrix explicitp(const Vector& p)
+{
+  int dim = p.size()+1; // p will always m-1 values for an m x m matrix
+  Matrix P(dim, dim, 0.0); // To return the permutation matrix in
+  // Set P as the identity to start with
+  for (int i = 0; i < dim; i++){
+    P(i, i) = 1.0;
+  }
+  // Start construction
+  for(int i = 0; i < dim-1; i++){
+    Matrix temp(dim, dim, 0.0);
+    // Need to maintain rows that weren't swapped
+    for (int j = 0; j < dim; j++){
+      if(j!= i && j!=p(i)){
+	temp(j, j) = 1.0;
+      }
+    }
+    temp(p(i), i) = 1.0; // rows i and p(i) were swapped at step i
+    temp(i, p(i)) = 1.0; 
+    P = temp*P;
+  }
+  return P;
+}
+
+// Implicity calculate Pb without ever forming P, 
+// where P is the permutation matrix from the dgelu procedure
+void implicitpb(const Vector& p, Vector& b)
+{
+  int dim = p.size();
+  double temp = 0.0;
+  for (int i = 0; i < dim; i++){
+    // Swap the rows of b as specified by p
+    temp = b(i);
+    b[i] = b(p(i));
+    b[p(i)] = temp;
+  }
+}

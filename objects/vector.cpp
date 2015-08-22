@@ -6,6 +6,7 @@
  *   14/08/15           Robert Shaw             Original code.
  *   15/08/15           Robert Shaw             Added error handling.
  *   19/08/15           Robert Shaw             Added p-norm and dot product.
+ *   20/08/15           Robert Shaw             Added outer product, angle, sorting.
  */
  
  #include "vector.hpp"
@@ -377,7 +378,7 @@ double pnorm(const Vector& u, int p)
   } else {
     for (int i = 0; i < usize; i++) {
       // Calculate (p-norm)^p
-      rVal += std::pow(u(i), p);   
+      rVal += std::pow(fabs(u(i)), p);   
     }
     rVal = std::pow(rVal, 1.0/(double(p)));
   }

@@ -1,5 +1,6 @@
 /*
- *    Purpose: Declare the signatures of several vector-based routines
+ *    Purpose: Declare the signatures of several matrix factorisation routines
+ *             and any associated procedures.
  * 
  *    DATE                AUTHOR               CHANGES
  *    =================================================================
@@ -29,4 +30,13 @@ void implicitqx(const Matrix& v, Vector& x);
 // Or Q(T)b instead
 void implicitqtb(const Matrix& v, Vector& b);
 // Return the full Q matrix from the HH decomp
-Matrix implicitq(const Matrix& v);
+Matrix explicitq(const Matrix& v);
+// Get the LU decomposition of A by Gaussian Elimination with 
+// partial pivoting. This actually computes PA = LU, putting L, U
+// into the matrix B, and returning a vector of the row interchanges.
+Vector dgelu(const Matrix& A, Matrix& B);
+// Explicitly form the matrix P from the output of dgelu
+Matrix explicitp(const Vector& p);
+// Implicitly form Pb, where b is a vector, and P is the permutation
+// matrix from the Gaussian eliminiation
+void implicitpb(const Vector& p, Vector& b); 

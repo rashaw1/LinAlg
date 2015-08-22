@@ -10,6 +10,8 @@
  *     =====================================================================
  *     13/08/15         Robert Shaw           Original code
  *     14/08/15         Robert Shaw           Added error throwing
+ *     20/08/15         Robert Shaw           Changed approach to matrix-
+ *                                            matrix multiplication.
  */
 
 #ifndef MATRIXHEADERDEF
@@ -44,6 +46,12 @@ public:
   // Shaping functions
   void resize(int m, int n); // Resize to empty m x n matrix
   void assign(int m, int n, const double& a); // Resize, setting all entries to a
+  void removeRow(int r); // Remove row r
+  void removeCol(int c); // Remove column c
+  void swapRows(int i, int j, int start, int end); // Swap (sections of )rows i and j
+  void swapCols(int i, int j, int start, int end); // Swap (sections of )cols i and j
+  void swapRows(int i, int j, int start = 0); // Assumed start/end points
+  void swapCols(int i, int j, int start = 0); // Assumed start/end points
   // Overloaded operators
   double& operator[](int i); // Return pointer to first element of row i
   double& operator()(int i, int j); // Return pointer to element ij

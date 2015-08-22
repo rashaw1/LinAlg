@@ -5,13 +5,13 @@
  *   ============================================================================
  *   14/08/15           Robert Shaw             Original code.
  *   15/08/15           Robert Shaw             Added error handling.
- *
+ *   20/08/15           Robert Shaw             Matrix-matrix mult. now uses inner.
  */
  
  #include "matrix.hpp"
  #include "vector.hpp"
 #include <cmath>
- 
+
 // Clean up utility for memory deallocation
 
 void Matrix::cleanUp()
@@ -242,6 +242,86 @@ void Matrix::assign(int m, int n, const double& a)
   }
 }
 
+// Remove a given column or row from the matrix
+void Matrix::removeRow(int r)
+{
+  Matrix temp(rows-1, cols);
+  // Copy rows into temp
+  int k = 0; // Count through loop
+  for (int i = 0; i < rows; i++){
+    if (i != r){
+      for (int j = 0; j < cols; j++){
+	temp(k, j) = arr[i][j];
+      }
+      k++;
+    }
+  }
+  // Resize and copy temp back
+  int m = rows;
+  resize(m-1, cols);
+  for (int i = 0; i < m-1; i++){
+    for (int j = 0; j < cols; j++){
+      arr[i][j] = temp(i, j);
+    }
+  }
+}
+
+void Matrix::removeCol(int c)
+{
+  Matrix temp(rows, cols-1);
+  // Copy cols into temp                                                                                                 
+  int k = 0; // Count through loop                                                                                 
+  for (int i = 0; i < cols; i++){
+    if ( i != c ) {
+      for (int j = 0; j < rows; j++){
+	temp(j, k) = arr[j][i];
+      }
+      k++;
+    }
+  }
+  // Resize and copy temp back                                        
+  int n = cols;
+  resize(rows, n-1);
+  for (int i = 0; i <n-1; i++){
+    for (int j = 0; j < rows; j++){
+      arr[j][i] = temp(j, i);
+    }
+  }
+}
+
+// Swap two columns or rows
+void Matrix::swapRows(int i, int j, int start, int end)
+{
+  double temp = 0.0;
+  // Copy in value from row i to temp
+  // then copy j into i, then temp back into j
+  for (int a = start; a < end; a++){
+    temp = arr[i][a];
+    arr[i][a] = arr[j][a];
+    arr[j][a] = temp;
+  }
+}
+
+void Matrix::swapCols(int i, int j, int start, int end)
+{
+  double temp = 0.0;
+  for (int a = start; a < end; a++){
+    temp = arr[a][i];
+    arr[a][i] = arr[a][j];
+    arr[a][j] = temp;
+  }
+}
+
+void Matrix::swapRows(int i, int j, int start)
+{
+  swapRows(i, j, start, cols);
+}
+
+void Matrix::swapCols(int i, int j, int start)
+{
+  swapCols(i, j, start, rows);
+}
+
 // Overloaded operators
 
 // Return pointer to first element of row i
@@ -430,7 +510,7 @@ double pnorm(const Matrix& m, int p)
     double tval1; // Temporary norm value
     for (int i = 0; i < rows; i++) { // Loop over rows
       temp1 = m.rowAsVector(i);
-      tval1 = pnorm(temp1, 1); // Get 1-norm (i.e. sum of values)
+      tval1 = pnorm(temp1, 1); // Get 1-norm (i.e. sum of absolute values)
       // Change rval if tval is bigger
       rval = (tval1 > rval ? tval1 : rval);
     }
