@@ -29,3 +29,6 @@
 
 #temp files
 *~
+
+#mac osx thing
+.DS_Store
