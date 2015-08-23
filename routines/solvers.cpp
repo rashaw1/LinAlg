@@ -5,6 +5,7 @@
 #include "matrix.hpp"
 #include "error.hpp"
 #include <cmath>
+#include <iostream>
 
 // Back substitution of the triangular system Rx = y
 Vector backsub(const Matrix& R, const Vector& y)
@@ -183,7 +184,7 @@ Vector choleskysolve(const Matrix& A, const Vector& b)
 
 // Do the same as above where the decomposition is already given -
 // note the arguments are reversed
-Vector Cholesky(const Vector& b, const Matrix& R)
+Vector choleskysolve(const Vector& b, const Matrix& R)
 {
   int dim = b.size();
   Vector x(dim); // Solution vector
@@ -254,8 +255,9 @@ double inverseiter(const Matrix& A, Vector& v, double u, double PRECISION, int M
   for (int i = 0; i < dim; i++){
     X(i, i) -= u;
   }
-  Matrix B; Vector p; // Will store the LU decomposition
+  Matrix B; Vector p; // Will store the LU/cholesky decomposition
   p = dgelu(X, B);
+
   // Begin loop                                                                   
   double dist = 1.0; // Track distance between eigenvalue at each iter                  
   double err = 1.0; // Track error - max of dist and norm                            
@@ -263,19 +265,21 @@ double inverseiter(const Matrix& A, Vector& v, double u, double PRECISION, int M
   int iter = 0; // Track number of iterations                                 
   Vector oldv;
   while(err > PRECISION && iter < MAXITER){
-    oldv = v; // Store previous vector                                            
-    w = lusolve(B, p, v); // Solve (A-uI)w = v for w
+    oldv = v; // Store previous vector                           
+    // Solve the system of equations
+    w = lusolve(B, p, v);
     v = w;
     w.sort();
     lambda = (fabs(w(0)) > fabs(w(dim-1)) ? w(0) : w(dim-1));
     v = (1.0/lambda)*v;
     lambda = (1.0/lambda) + u;
     dist = fabs(lambda - oldlambda);
-    norm = pnorm(v-oldv);
+    norm = pnorm(v-oldv)/(pnorm(v));
     err = (norm < dist ? dist : norm);
     oldlambda = lambda;
     iter++;
   }
+  v = (1.0/pnorm(v))*v;
   return lambda;
 }  
 
@@ -316,4 +320,79 @@ double rayleigh(const Matrix& A, Vector& v, double l0, double PRECISION, int MAX
     iter++;
   }
   return mu;
+}
+
+// QR Algorithm with shifts to calculate the eigenvalues of a matrix A.
+// Assumes real symmetric matrix.
+bool qrshift(const Matrix& A, Vector& vals, double PRECISION, int MAXITER)
+{
+  bool rval = true;
+  int n = A.nrows(); // Must be square
+  vals.resize(n);
+  Matrix v;
+  Matrix vectemp;
+  // Reduce A to tridiagonal form
+  if(hessenberg(A, vectemp, v)){
+    // Begin main loop
+    for (int m = n-1; m > 0; m--){
+      // Proceed until subdiagonal element is essentially zero
+      int iter = 0;
+      while(fabs(vectemp(m-1, m)) > PRECISION && iter < MAXITER){
+	// Form vecs - vec(m, m)*I = temp
+	Matrix temp1;
+	temp1 = vectemp;
+	for (int i = 0; i<m+1; i++){
+	  temp1(i, i) = temp1(i, i) - temp1(m, m);
+	}
+	// Do householder qr decomp
+	Matrix temp2;
+	if (dgehh(temp1, temp2, v)){
+	  // Form R*Q
+	  temp1 = explicitq(v);
+	  temp1 = temp2*temp1;
+	  // Add in vectemp(m, m) * I
+	  for (int i = 0; i < m+1; i++){
+	    temp1(i, i) = temp1(i, i) + vectemp(m, m);
+	  }
+	  vectemp = temp1;
+	} else {
+	  rval = false; // Something went wrong
+	}
+	iter++;
+      }
+      // Record eigenvalue m
+      vals[m] = vectemp(m, m);
+      // Deflate vectemp
+      vectemp.removeRow(m);
+      vectemp.removeCol(m);
+    }
+    // Record eigenvalue 0
+    vals[0] = vectemp(0, 0);
+  } else {
+    rval = false; // Something went wrong with hessenberg
+  }
+  return rval;
+}
+
+// Same as above, but for when vectors are wanted as well
+bool qrshift(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION, int MAXITER)
+{
+  bool rval = true;
+  if(qrshift(A, vals, PRECISION, MAXITER)){
+    // Find eigenvectors using inverse iteration, as we have a good guess for eigenvalue
+    double temp;
+    int dim = vals.size();
+    Vector v(dim);
+    for (int i = 0; i<dim; i++){
+      v[i] = 1.0;
+    }
+    vecs.resize(dim, dim);
+    for(int i = 0; i < dim; i++){
+      temp = inverseiter(A, v, vals(i), PRECISION, MAXITER);
+      vecs.setCol(i, v);
+    }
+  } else {
+    rval = false;
+  }
+  return rval;
 }

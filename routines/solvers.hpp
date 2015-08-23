@@ -5,7 +5,8 @@
  *   DATE             AUTHOR            CHANGES
  *   ===============================================================
  *   21/08/15         Robert Shaw       Original code
- *   22/08/15         Robert Shaw       Iterationive eigenv's  added.
+ *   22/08/15         Robert Shaw       Iterative eigenv's  added.
+ *                                        
  */
 
 // Declare forward dependencies
@@ -59,3 +60,10 @@ double inverseiter(const Matrix& A, Vector& v, double u, double PRECISION = 1e-1
 // Use the Rayleigh Iteration Algorithm to get approximations for an eigenvec/val pair
 // of a matrix A. Returns eigenvalue, stores vector in v.
 double rayleigh(const Matrix& A, Vector& v, double l0, double PRECISION = 1e-8, int MAXITER = 50);
+
+// Use the QR algorithm with shifts to find the approximate eigenvalues
+// of a matrix A. The values are returned in the vector vals.
+// The second instance is for when vectors are wanted as well.
+// Will return true if successful.
+bool qrshift(const Matrix& A, Vector& vals, double PRECISION = 1e-12, int MAXITER = 100);
+bool qrshift(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION = 1e-12, int MAXITER=100);

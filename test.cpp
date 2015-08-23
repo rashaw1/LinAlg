@@ -1,3 +1,4 @@
+
 // Test out the libraries
 
 #include "factors.hpp"
@@ -8,6 +9,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 
 int main(int argc, char* argv[]){
   Matrix x(5, 5);
@@ -87,6 +90,25 @@ int main(int argc, char* argv[]){
     std::cout << "Hessenberg failed.\n";
   }
 
+  x.resize(10, 10);
+  srand((unsigned) time(0));
+  for (int i = 0; i < 10; i++){
+    x(i, i) = rand()%10+1;
+    for (int j = 0; j < i; j++){
+      x(i, j) = x(j, i) = rand()%11;
+    }
+  }
+  Vector vals; Matrix vecs;
+  if(qrshift(x, vals, vecs, 1e-10, 50)){
+    vecs.print();
+    std::cout << "\n\n";
+    vals.sort();
+    vals.print();
+    std::cout << "\n\n";
+  } else {
+    std::cout << "QR shift failed\n";
+  }
+
   // Test Cholesky
   x.resize(3, 3);
   x(0, 0) = x(1, 1) = x(2, 2) = 3.0;
@@ -100,10 +122,10 @@ int main(int argc, char* argv[]){
 
   // Test power method / inverse power method
   x(0, 0) = 1.0; x(0, 1) = 2.0; x(0, 2) = 3.0;
-  x(1, 0) = 1.0; x(1, 1) = 2.0; x(1, 2) = 1.0;
-  x(2, 0) = 3.0; x(2, 1) = 2.0; x(2, 2) = 1.0;
-  d[0] = -0.1; d[1] = -0.1; d[2] = 0.1;
-  double lam = rayleigh(x, d, -50.0, 1e-10, 30);
+  x(1, 0) = 2.0; x(1, 1) = 2.0; x(1, 2) = 1.0;
+  x(2, 0) = 3.0; x(2, 1) = 1.0; x(2, 2) = 1.0;
+  d[0] = 1.0; d[1] = 1.0; d[2] = 1.0;
+  double lam = rayleigh(x, d, 3.5, 1e-8, 100);
   std::cout << lam << "\n";
   d.print(1e-10);
   std::cout << "\n\n";
