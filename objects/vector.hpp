@@ -8,6 +8,7 @@
  *     14/08/15         Robert Shaw           Added error throwing.
  *     20/08/15         Robert Shaw           Added outer product, angle,
  *                                            and sorting.
+ *     26/08/15         Robert Shaw           Added triple and cross products.
  */
 
 #ifndef VECTORHEADERDEF
@@ -63,6 +64,12 @@ public:
   friend Matrix outer(const Vector& u, const Vector& w);
   // Return angle (in radians) between two vectors
   friend double angle(const Vector& u, const Vector& w);
+
+  // !!!ONLY FOR 3D VECTORS!!!
+  // Calculate the cross product of two vectors
+  friend Vector cross(const Vector& u, const Vector& w);
+  // Calculate the triple product of three vectors
+  friend double triple(const Vector& u, const Vector& w, const Vector& z);
 };
 
 // Scalar multiplication

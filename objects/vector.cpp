@@ -7,6 +7,7 @@
  *   15/08/15           Robert Shaw             Added error handling.
  *   19/08/15           Robert Shaw             Added p-norm and dot product.
  *   20/08/15           Robert Shaw             Added outer product, angle, sorting.
+ *   26/08/15           Robert Shaw             Added cross/triple products.
  */
  
  #include "vector.hpp"
@@ -400,4 +401,25 @@ double angle(const Vector& u, const Vector& w)
     rval = std::acos(dprod/(unorm*wnorm));
   }
   return rval;
+}
+
+
+// !!!ONLY FOR 3D VECTORS!!!
+
+// Cross product
+Vector cross(const Vector& u, const Vector& w)
+{
+  Vector r(3);
+  r[0] = u(1)*w(2) - w(1)*u(2);
+  r[1] = w(0)*u(2) - w(2)*u(0);
+  r[2] = u(0)*w(1) - u(1)*w(0);
+  return r;
+}
+
+// Triple product
+double triple(const Vector& u, const Vector& w, const Vector& z)
+{
+  Vector r(3);
+  r = cross(u, w);
+  return inner(r, z);
 }
