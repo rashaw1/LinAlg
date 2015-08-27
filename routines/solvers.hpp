@@ -6,8 +6,11 @@
  *   ===============================================================
  *   21/08/15         Robert Shaw       Original code
  *   22/08/15         Robert Shaw       Iterative eigenv's  added.
- *                                        
+ *   23/08/15         Robert Shaw       Symqr with implicit shifts.
  */
+
+#ifndef SOLVERSHEADERDEF
+#define SOLVERSHEADERDEF
 
 // Declare forward dependencies
 class Vector;
@@ -67,3 +70,34 @@ double rayleigh(const Matrix& A, Vector& v, double l0, double PRECISION = 1e-8, 
 // Will return true if successful.
 bool qrshift(const Matrix& A, Vector& vals, double PRECISION = 1e-12, int MAXITER = 100);
 bool qrshift(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION = 1e-12, int MAXITER=100);
+
+// Implcitshift step needed for symqr                                           
+Matrix implicitshift(Matrix& T, double PRECISION);
+
+// The QR algorithm for a real-symmetric matrix using implicit shifts is more efficient
+// than the above alternative
+bool symqr(const Matrix& A, Vector& vals, double PRECISION = 1e-12);
+bool symqr(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION);
+
+
+// Utility functions for symeig that pack and unpack matrices              
+void splitmatrix(const Matrix& B, Matrix& b1, Matrix& b2, int i);
+void joinmatrix(Vector& vals, const Vector& vals1, const Vector& vals2,
+		Matrix& vecs, const Matrix& vecs1, const Matrix& vecs2, int i);
+
+/* UNDER CONSTRUCTION
+// Use a divide and conquer algorithm to find the eigenvalues and vectors
+// of a real symmetric matrix A. This is generally the fastest method
+// when a complete set of both values and vectors are needed.
+// Will return values in vector vals, vectors in the columns of matrix
+// vecs, and returns true if successful.
+bool symeig(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION = 1e-12, bool tridiag = false, int MINDAC = 10);
+
+// Find zero of secular equation for symeig
+double findzero(Vector& d, const Vector& v, int i, double PRECISION = 1e-12);
+
+// Do the rank1 update part of the symeig procedure
+void diagupdate(Vector& D, double bm, Vector& z, Vector& vals, Matrix& Q, double PRECISION);
+*/
+
+#endif

@@ -1,6 +1,7 @@
 // Implements solvers.hpp
 
 #include "factors.hpp"
+#include "solvers.hpp"
 #include "vector.hpp"
 #include "matrix.hpp"
 #include "error.hpp"
@@ -132,7 +133,8 @@ Vector lusolve(const Matrix& B, const Vector& p, const Vector& b)
   Vector x(dim); // Solution vector
   x = b;
   implicitpb(p, x); // Calculate Pb implicitly
-  // Solve Ly = Pb by forward substitution                                                     // remembering diagonal of L is all ones                                      
+  // Solve Ly = Pb by forward substitution
+  //remembering diagonal of L is all ones
   for (int i = 1; i < dim; i++){
     double sum = 0.0;
     for (int j = 0; j < i; j++){
@@ -396,3 +398,193 @@ bool qrshift(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION, int 
   }
   return rval;
 }
+
+// The real symmetric case is more efficiently solved by using implicit shifts
+// as in the following implementation:
+bool symqr(const Matrix& A, Vector& vals, double PRECISION)
+{
+  bool rval = true;
+  int dim = A.nrows(); // It's square
+  vals.resize(dim);
+  Matrix B; Matrix q;
+  // Tridiagonalise
+  if(hessenberg(A, B, q)){
+    int flag = 0;
+    while (flag < dim-1){
+      // Reduce B
+      for (int i = 0; i < dim-1; i++){
+	// Set elements to zero if tiny
+	if (fabs(B(i, i+1)) < PRECISION){
+	  B(i, i+1) = B(i+1, i) = 0.0;
+	}
+      }
+      // See if diagonal matrix in top left
+      int p = 0;
+      while (p < dim - 1){
+	if(B(p, p+1) == 0.0){
+	  p++;
+	} else {
+	  break;
+	}
+      }
+      // See if diagonal matrix in bottom right
+      int q = dim-1; 
+      while(q > p){
+	if(B(q, q-1) == 0.0){
+	  q--;
+	} else {
+	  break;
+	}
+      }
+      // p is now the point at which the unreduced tridiagonal matrix begins
+      // and q is the point at which the lower right diagonal matrix begins
+      
+      // We now perform the shift on the unreduced matrix
+      if (p!=q && flag < dim-1) { // If p = q, then the matrix is diagonal already!
+	Matrix D(q-p+1, q-p+1, 0.0);
+	// Copy values in
+	for (int i = p; i < q; i++){
+	  D(i-p, i-p) = B(i, i);
+	  D(i-p+1, i-p) = D(i-p, i-p+1) = B(i, i+1);
+	}
+	D(q-p, q-p) = B(q-p, q-p);
+	// Do the implicit shift step, getting the transformation matrix Z
+	Matrix Z;
+	Z = implicitshift(D, PRECISION);
+	// Recompute B
+	for (int i = p; i < q; i++){
+	  B(i, i) = D(i-p, i-p);
+	  B(i, i+1) = B(i+1, i) = D(i-p+1, i-p);
+	}
+	B(q-p, q-p) = D(q-p, q-p);
+      }
+      flag = p;
+    }
+    // Copy eigenvalues from diagonal of B
+    for (int i = 0; i < dim; i++){
+      vals[i] = B(i, i);
+    }
+  } else { // Hessenberg failed
+    rval = false;
+  }
+  return rval;
+}
+
+// Same as above, but computes eigenvectors as well
+bool symqr(const Matrix& A, Vector& vals, Matrix& vecs, double PRECISION)
+{
+  bool rval = true;
+  int dim = A.nrows(); // It's square
+  vals.resize(dim);
+  vecs.resize(dim, dim);
+  Matrix B; Matrix q;
+  // Tridiagonalise
+  if(hessenberg(A, B, q)){
+    // Form the Q matrix
+    vecs = explicitq(q);
+    int flag = 0;
+    while (flag < dim-1){
+      // Reduce B
+      for (int i = 0; i < dim-1; i++){
+	// Set elements to zero if tiny
+	if (fabs(B(i, i+1)) < PRECISION){
+	  B(i, i+1) = B(i+1, i) = 0.0;
+	}
+      }
+      // See if diagonal matrix in top left
+      int p = 0;
+      while (p < dim - 1){
+	if(B(p, p+1) == 0.0){
+	  p++;
+	} else {
+	  break;
+	}
+      }
+      // See if diagonal matrix in bottom right
+      int q = dim-1; 
+      while(q > p){
+	if(B(q, q-1) == 0.0){
+	  q--;
+	} else {
+	  break;
+	}
+      }
+      // p is now the point at which the unreduced tridiagonal matrix begins
+      // and q is the point at which the lower right diagonal matrix begins
+      
+      // We now perform the shift on the unreduced matrix
+      if (p!=q && flag < dim-1) { // If p = q, then the matrix is diagonal already!
+	Matrix D(q-p+1, q-p+1, 0.0);
+	// Copy values in
+	for (int i = p; i < q; i++){
+	  D(i-p, i-p) = B(i, i);
+	  D(i-p+1, i-p) = D(i-p, i-p+1) = B(i, i+1);
+	}
+	D(q-p, q-p) = B(q-p, q-p);
+	// Do the implicit shift step, getting the transformation matrix Z
+	Matrix Z;
+	Z = implicitshift(D, PRECISION);
+	// Recompute B
+	for (int i = p; i < q; i++){
+	  B(i, i) = D(i-p, i-p);
+	  B(i, i+1) = B(i+1, i) = D(i-p+1, i-p);
+	}
+	B(q-p, q-p) = D(q-p, q-p);
+	// Recompute Q
+	D.assign(dim, dim, 0.0);
+	for (int i = 0; i < p; i++) { D(i, i) = 1.0; }
+	for (int i = q+1; i < dim; i++) { D(i, i) = 1.0;}
+	for (int i = p; i < q+1; i++){
+	  for (int j = p; j < q+1; j++){
+	    D(i, j) = Z(i-p, j-p);
+	  }
+	}
+	vecs = vecs*D;
+      }
+      flag = p;
+    }
+    // Copy eigenvalues from diagonal of B
+    for (int i = 0; i < dim; i++){
+      vals[i] = B(i, i);
+    }
+  } else { // Hessenberg failed
+    rval = false;
+  }
+  return rval;
+}
+
+// This does the implicit symmetric QR step with Wilkinson shift needed for the
+// symqr algorithm. It overwrites the tridiagonal matrix T with Z(T)TZ where
+// Z is a product of givens rotations, and returns Z.
+Matrix implicitshift(Matrix& T, double PRECISION)
+{
+  int n = T.nrows(); // It's square
+  Matrix Z(n, n);
+  double d = (T(n-2, n-2) - T(n-1, n-1))/2.0;
+  double u = (d < 0.0 ? -1.0 : 1.0); // Get the sign of d
+  u = u*sqrt(d*d + T(n-1, n-2)*T(n-1, n-2));
+  u = T(n-1, n-1) -  (T(n-1, n-2)*T(n-1, n-2))/(d + u);
+  double x = T(0, 0) - u;
+  double z = T(1, 0);
+  // Begin main loop
+  Vector g; // To store a temporary givens rotation in
+  for (int k = 0; k < n-1; k++){
+    g = givens(x, z, PRECISION);
+    if (k == 0) { // Explicitly get the first givens matrix
+      Z = explicitg(g, 0, 1, n);
+    } else { // Implicitly keep calculating Z
+      Z = givens(Z, g, k, k+1);
+    }
+    // Calculate TG
+    T = givens(T, g, k, k+1);
+    // Calculate G(T)T
+    T= givens(g, T, k, k+1);
+    if (k < n-2){
+      x = T(k+1, k);
+      z = T(k+2, k);
+    }
+  }
+  return Z;
+}
+
+

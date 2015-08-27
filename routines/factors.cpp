@@ -368,3 +368,91 @@ bool hessenberg(const Matrix& x, Matrix& y, Matrix& v)
   }
   return rval;
 }
+
+// Compute and apply givens rotations
+Vector givens(double a, double b, double PRECISION)
+{
+  Vector g(2); // Return vector, [c, s]
+  double c, s;
+  if (fabs(b) < PRECISION){
+    c = 1.0; s=0.0;
+  } else {
+    double tau;
+    if (fabs(b) - fabs(a) > PRECISION){
+      tau = -1.0*a/b;
+      s = 1.0/sqrt(1+tau*tau);
+      c = s*tau;
+    } else {
+      tau = -1.0*b/a;
+      c = 1.0/sqrt(1+tau*tau);
+      s = c*tau;
+    }
+  }
+  g[0] = c; g[1] = s;
+  return g;
+}
+
+// G is the givens rotation G(i, k, t), represented by the vector [c, s] and
+// the positions i, k.
+Matrix givens(const Vector& G, const Matrix& A, int i, int k)
+{
+  Matrix GA; // Will return the product G(T)A
+  GA = A;
+  double tau1, tau2;
+  for (int j = 0; j < A.ncols(); j++){
+    tau1 = A(i, j);
+    tau2 = A(k, j);
+    // Only two rows are affected
+    GA(i, j) = G(0)*tau1 - G(1)*tau2;
+    GA(k, j) = G(1)*tau1 + G(0)*tau2;
+  }
+  return GA;
+}
+
+Matrix lgivens(const Vector& G, const Matrix& A, int i, int k){
+  Matrix GA; // Will return the product GA
+  GA = A;
+  double tau1, tau2;
+  for (int j = 0; j < A.ncols(); j++){
+    tau1 = A(i, j);
+    tau2 = A(k, j);
+    // Only two rows affected
+    GA(i, j) = G(0)*tau1 - G(1)*tau2;
+    GA(k, j) = G(0)*tau2 + G(1)*tau1;
+  }
+  return GA;
+}
+
+Matrix givens(const Matrix& A, const Vector& G, int i, int k){
+  Matrix AG; // Will return the product AG
+  AG = A;
+  double tau1, tau2;
+  for (int j = 0; j < A.nrows(); j++){
+    tau1 = A(j, i);
+    tau2 = A(j, k);
+    // Only two columns affected
+    AG(j, i) = G(0)*tau1 - G(1)*tau2;
+    AG(j, k) = G(1)*tau1 + G(0)*tau2;
+  }
+  return AG;
+}
+
+// Explicitly form a givens matrix
+Matrix explicitg(const Vector& g, int i, int k, int dim)
+{
+  Matrix G(dim, dim, 0.0); // Make a dim x dim matrix of zeroes
+  // Turn into the identity matrix, except with c at positions
+  // (i, i) and (k, k)
+  for (int j = 0; j < dim; j++){
+    if(j == i || j == k){
+      G(j, j) = g(0);
+    } else {
+      G(j, j) = 1.0;
+    }
+  }
+  // Set the s elements
+  G(i, k) = g(1);
+  G(k, i) = -1.0*g(1);
+  return G;
+}
+  
