@@ -29,6 +29,9 @@ public:
   Error(std::string c, std::map<std::string, std::string> errormap);
   // Print to primary output stream, full = false gives just the code
   void print(bool full = true); 
+  // Accessors
+  std::string getCode() const { return code; }
+  std::string getMsg() const { return msg; }
 };
 
 #endif

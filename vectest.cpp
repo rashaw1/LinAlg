@@ -37,5 +37,26 @@ int main(int argc, char* argv[])
   dVec.print();
   dVec.sort();
   dVec.print();
+  int dim = 5;
+  double PRECISION = 1e-12;
+  Vector v(dim);
+  v[0] = 0.0; v[1] = 5.4; v[2] = 3.2; v[3] = 0.0; v[4] = 4.1;
+  Matrix P(dim, dim, 0.0);
+  for (int j = 0; j < dim; j++) { P(j, j) = 1.0; } // Turn into identity                                                                                         
+  int k= dim-1; // Keep track of last non-zero entry                                                                                                            
+  for (int j = dim-1; j > -1; j--){ // Start at bottom and work up                                                                   
+    if (fabs(v(j))< PRECISION && k!=j ){
+      std::cout << "\n Found a zero. \n";
+      // And swap the two rows                                                                                                                                   
+      P.swapRows(j, k);
+      k--;
+    }
+  }
+  std::cout << "\n\n";
+  P.print();
+  v = P*v;
+  std::cout << "\n\n";
+  v.print();
+
   return 0;
 }

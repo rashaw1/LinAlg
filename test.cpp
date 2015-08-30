@@ -90,19 +90,20 @@ int main(int argc, char* argv[]){
     std::cout << "Hessenberg failed.\n";
   }
 
-  x.resize(10, 10);
+  x.resize(5, 5);
   srand((unsigned) time(0));
-  for (int i = 0; i < 10; i++){
+  for (int i = 0; i < 5; i++){
     x(i, i) = rand()%10+1;
     for (int j = 0; j < i; j++){
       x(i, j) = x(j, i) = rand()%11;
     }
   }
+  x.print();
+  std::cout << "\n\n";
   Vector vals; Matrix vecs;
-  if(qrshift(x, vals, vecs, 1e-10, 50)){
+  if(symqr(x, vals, vecs, 1e-12)){
     vecs.print();
     std::cout << "\n\n";
-    vals.sort();
     vals.print();
     std::cout << "\n\n";
   } else {
@@ -129,4 +130,13 @@ int main(int argc, char* argv[]){
   std::cout << lam << "\n";
   d.print(1e-10);
   std::cout << "\n\n";
+
+  x.assign(4, 4, 0.0);
+  x(0, 0) = 4.99; x(0, 1) = x(1, 0) = -0.2236068; x(0, 2) = x(2, 0) = 0.0;
+  x(1, 1) = -2.48056; x(1, 2) = x(2, 1) = -1.1029755; x(1, 3) = x(3, 1) = 0.0;
+  x(2, 2) = -2.48056; x(2, 3) = x(3, 2) = -0.2236068; x(3, 3) = 4.99;
+  if(symqr(x, vals, vecs, 1e-12)){
+    vals.print();
+    vecs.print();
+  }
 }
