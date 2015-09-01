@@ -26,7 +26,7 @@ bool dgegs(const Matrix& x, Matrix& q, Matrix& r, const double& PRECISION)
   }
   // Define a placeholder array of vectors for q
   Vector* qa = new Vector[dim];
-  r(0, 0) = pnorm(xa[0]); // Calculate 2-norm of x_0
+  r(0, 0) = pnorm(xa[0], 2); // Calculate 2-norm of x_0
   if (r(0, 0) < PRECISION) { // Singular norm - algorithm fails
     rVal = false;
   } else {
@@ -39,7 +39,7 @@ bool dgegs(const Matrix& x, Matrix& q, Matrix& r, const double& PRECISION)
         r(i, j) = inner(qa[i], y); // qT*y
         y = y - r(i, j)*qa[i];
       }
-      r(j, j) = pnorm(y); // 2-norm of y
+      r(j, j) = pnorm(y, 2); // 2-norm of y
       if (r(j, j) < PRECISION) { 
         rVal = false; 
         break; 
@@ -87,10 +87,10 @@ bool dgehh(const Matrix& x, Matrix& y, Matrix& v)
       }
     }
     // Compute the reflector
-    value = pnorm(column);
+    value = pnorm(column, 2);
     value = (column(0) < 0 ? -value : value);
     column[0] = column(0)+ value;
-    value = pnorm(column);
+    value = pnorm(column, 2);
     column = (1.0/value)*column;
 
     // Transform the submatrix
@@ -305,8 +305,13 @@ Matrix cholesky(const Matrix& A)
 bool hessenberg(const Matrix& x, Matrix& y, Matrix& v)
 {
   bool rval = true;
-  if (x.isSquare()){ // Must be square to proceed
-    int dim = x.nrows();
+  int dim = x.nrows();
+  if (x.isTriangular()){ // No need to reduce it
+    y = x;
+    v.assign(dim, dim, 0.0);
+    for (int i = 0; i < dim; i++) { v(i, i) = 1.0; }
+  }
+  else if (x.isSquare()){ // Must be square to proceed    
     // Make sure v, y are the right size
     y = x; // Initialise to input matrix
     v.assign(dim, dim, 0.0); // Make all zeroes 
@@ -321,10 +326,10 @@ bool hessenberg(const Matrix& x, Matrix& y, Matrix& v)
       }
       // Compute the reflector
       // Choose the sign that maxmises distance of reflected vector
-      double val = (xk(0) < 0 ? -1.0*pnorm(xk) : pnorm(xk));
+      double val = (xk(0) < 0 ? -1.0*pnorm(xk, 2) : pnorm(xk, 2));
       vk = xk;
       vk[0] += val; // Correct leading value
-      vk  = (1.0/pnorm(vk))*vk; // Normalise
+      vk  = (1.0/pnorm(vk, 2))*vk; // Normalise
       // Compute the changes to y
       Matrix temp1(dim-k-1, dim-k);
       // Copy values needed into temp matrix

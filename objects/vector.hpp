@@ -57,7 +57,7 @@ public:
   Vector sorted() const; // Returns a sorted copy of the vector
   void sort(); // Sorts the vector into ascending order, uses quicksort 
   // Friend functions
-  friend double pnorm(const Vector& u, int p = 2); // Returns the p-norm of u
+  friend double pnorm(const Vector& u, int p); // Returns the p-norm of u
   // Calculate the inner (dot) product of two vectors
   friend double inner(const Vector& u, const Vector& w);
   // Calculate the outer product of two vectors

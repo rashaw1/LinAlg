@@ -366,7 +366,7 @@ Matrix outer(const Vector& u, const Vector& w)
 // Default to 2-norm, p should be greater than or equal to 0, but no check is given.
 // p=0 will give the infinity norm as there isn't an appropriate symbol for infinity
 // (and a 0-norm would be pointless).
-double pnorm(const Vector& u, int p) 
+double pnorm(const Vector& u, int p = 2) 
 {
   int usize = u.size();
   double rVal = 0.0; // Initialise return value

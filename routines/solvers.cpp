@@ -211,7 +211,7 @@ double poweriter(const Matrix& A, Vector& v, double PRECISION, int MAXITER)
 {
   Vector w; // Temporary vector for intermediate steps
   int dim = v.size();
-  double norm = pnorm(v);
+  double norm = pnorm(v, 2);
   double lambda = 0.0; // The eigenvalue 
   if(norm - 1.0 > PRECISION) { // Normalise if not already
     v = (1.0/norm)*v;
@@ -232,7 +232,7 @@ double poweriter(const Matrix& A, Vector& v, double PRECISION, int MAXITER)
     lambda = (fabs(w(0)) > fabs(w(dim-1)) ? w(0) : w(dim-1));
     v = (1.0/lambda)*v;
     dist = fabs(lambda - oldlambda);
-    norm = pnorm(v-oldv);
+    norm = pnorm(v-oldv, 2);
     err = (norm < dist ? dist : norm);
     oldlambda = lambda;
     iter++;
@@ -246,7 +246,7 @@ double inverseiter(const Matrix& A, Vector& v, double u, double PRECISION, int M
 {
   Vector w; // Temporary vector for intermediate steps                              
   int dim = v.size();
-  double norm = pnorm(v);
+  double norm = pnorm(v, 2);
   double lambda = 0.0; // The eigenvalue                                   
   if(norm - 1.0 > PRECISION) { // Normalise if not already                     
     v = (1.0/norm)*v;
@@ -276,12 +276,12 @@ double inverseiter(const Matrix& A, Vector& v, double u, double PRECISION, int M
     v = (1.0/lambda)*v;
     lambda = (1.0/lambda) + u;
     dist = fabs(lambda - oldlambda);
-    norm = pnorm(v-oldv)/(pnorm(v));
+    norm = pnorm(v-oldv, 2)/(pnorm(v, 2));
     err = (norm < dist ? dist : norm);
     oldlambda = lambda;
     iter++;
   }
-  v = (1.0/pnorm(v))*v;
+  v = (1.0/pnorm(v, 2))*v;
   return lambda;
 }  
 
@@ -293,7 +293,7 @@ double rayleigh(const Matrix& A, Vector& v, double l0, double PRECISION, int MAX
 {
   double lambda = 0.0;
   double mu = l0;
-  v = (1.0/pnorm(v))*v;
+  v = (1.0/pnorm(v, 2))*v;
   // Form A - mu*I
   Matrix X;
   X = A;
@@ -305,10 +305,10 @@ double rayleigh(const Matrix& A, Vector& v, double l0, double PRECISION, int MAX
   y = lusolve(X, v);
   lambda = inner(y, v);
   mu = mu + (1.0/lambda);
-  double err = pnorm(y-lambda*v)/(pnorm(y));
+  double err = pnorm(y-lambda*v, 2)/(pnorm(y, 2));
   int iter = 0;
   while (err > PRECISION && iter < MAXITER){
-    v = (1.0/pnorm(y))*y;
+    v = (1.0/pnorm(y, 2))*y;
     // Form A - mu*I
     X = A;
     for (int i = 0; i < A.nrows(); i++){
@@ -318,7 +318,7 @@ double rayleigh(const Matrix& A, Vector& v, double l0, double PRECISION, int MAX
     y = lusolve(X, v);
     lambda = inner(y, v);
     mu = mu + (1.0/lambda);
-    err = pnorm(y-lambda*v)/pnorm(y);
+    err = pnorm(y-lambda*v, 2)/pnorm(y, 2);
     iter++;
   }
   return mu;
